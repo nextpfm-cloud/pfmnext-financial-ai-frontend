@@ -1,0 +1,17 @@
+"use client"
+
+import { useMemo, useState } from "react"
+import { ChevronDown, FileSearch, Layers3, Search } from "lucide-react"
+import type { DocumentChunk } from "@/types"
+
+export function DocumentChunks({ chunks }: { chunks: DocumentChunk[] }) {
+  const [query, setQuery] = useState("")
+  const [openPages, setOpenPages] = useState<Set<number>>(() => chunks[0] ? new Set([chunks[0].page]) : new Set())
+  const pages = useMemo(() => {
+    const grouped = chunks.filter((chunk) => `${chunk.heading ?? ""} ${chunk.content}`.toLowerCase().includes(query.toLowerCase())).reduce<Record<number, DocumentChunk[]>>((result, chunk) => { (result[chunk.page] ??= []).push(chunk); return result }, {})
+    return Object.entries(grouped).map(([page, items]) => ({ page: Number(page), items })).sort((left, right) => left.page - right.page)
+  }, [chunks, query])
+  const toggle = (page: number) => setOpenPages((current) => { const next = new Set(current); next.has(page) ? next.delete(page) : next.add(page); return next })
+
+  return <div className="space-y-5"><div><p className="eyebrow mb-2">Retrieval segmentation</p><h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Processed document chunks</h2><p className="mt-2 text-sm text-muted-foreground">Inspect page-aligned content exposed to vector retrieval.</p></div><label className="focus-glow relative block rounded-xl border border-border bg-card/60"><Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search extracted content…" className="h-12 w-full bg-transparent pl-11 pr-4 text-sm text-foreground/90 outline-none" /></label><div className="flex items-center gap-2 text-xs text-muted-foreground/70"><Layers3 className="h-3.5 w-3.5 text-sky-600 dark:text-sky-300" />{pages.reduce((total, page) => total + page.items.length, 0)} of {chunks.length} chunks across {pages.length} pages</div>{pages.length ? <div className="space-y-3">{pages.map(({ page, items }) => <section key={page} className="surface-card overflow-hidden"><button type="button" onClick={() => toggle(page)} className="flex w-full items-center justify-between px-4 py-4 text-left transition hover:bg-foreground/[0.025]"><span><span className="text-sm font-semibold text-foreground/90">Page {page}</span><span className="ml-2 text-xs text-muted-foreground/70">{items.length} chunks</span></span><ChevronDown className={`h-4 w-4 text-muted-foreground/70 transition ${openPages.has(page) ? "rotate-180" : ""}`} /></button>{openPages.has(page) && <div className="space-y-3 border-t border-border p-3 sm:p-4">{items.map((chunk) => <article key={chunk.chunk_id} className="rounded-xl border border-border bg-background/50 p-4">{chunk.heading && <h3 className="mb-3 text-sm font-medium text-sky-700 dark:text-sky-200">{chunk.heading}</h3>}<pre className="overflow-x-auto whitespace-pre-wrap font-mono text-[11px] leading-5 text-muted-foreground">{chunk.content}</pre><p className="mt-3 break-all border-t border-border pt-2 font-mono text-[9px] text-muted-foreground/55">{chunk.chunk_id}</p></article>)}</div>}</section>)}</div> : <div className="surface-card grid min-h-64 place-items-center text-center"><div><FileSearch className="mx-auto mb-3 h-6 w-6 text-muted-foreground/70" /><p className="text-sm text-muted-foreground">No chunks match your search.</p></div></div>}</div>
+}
