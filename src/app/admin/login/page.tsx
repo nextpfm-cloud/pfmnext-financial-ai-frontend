@@ -1,49 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowRight, Eye, EyeOff, Fingerprint, Loader2, LockKeyhole, ShieldCheck } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { ArrowRight, Fingerprint, Loader2, LockKeyhole, ShieldCheck } from "lucide-react"
 import { AppBrand } from "@/components/app-brand"
 import { ThemeSwitcher } from "@/components/theme-switcher"
-import type { UserRole } from "@/types"
+
+const SIGN_IN_ERRORS: Record<string, string> = {
+  expired: "Your sign-in attempt expired. Please try again.",
+  denied: "Sign in was cancelled.",
+  unauthorized: "Your identity could not be authorized for this application.",
+  unavailable: "Authentication service is unavailable. Please try again shortly.",
+  configuration: "Session security is not configured.",
+  failed: "Sign in failed. Please try again.",
+}
 
 export default function AdminLogin() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const errorCode = searchParams.get("error")
+  const error = errorCode ? SIGN_IN_ERRORS[errorCode] ?? SIGN_IN_ERRORS.failed : null
+  const signInParams = new URLSearchParams()
+  const requested = searchParams.get("next")
+  if (requested) signInParams.set("next", requested)
+  // After a failed attempt, force the credential prompt so a different account can be used.
+  if (errorCode) signInParams.set("prompt", "login")
+  const signInQuery = signInParams.toString()
+  const signInHref = `/api/auth/login${signInQuery ? `?${signInQuery}` : ""}`
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (isLoading) return
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      })
-      const result = await response.json().catch(() => ({})) as { error?: string; role?: UserRole }
-      if (!response.ok) throw new Error(result.error || "Sign in failed.")
-      const requested = searchParams.get("next")
-      const safeRequested = requested?.startsWith("/") && !requested.startsWith("//") ? requested : null
-      const destination = safeRequested?.startsWith("/account") ? safeRequested : result.role === "admin"
-        ? safeRequested?.startsWith("/admin") ? safeRequested : "/admin"
-        : result.role === "auditor" ? "/admin/audit" : "/chat"
-      router.replace(destination)
-      router.refresh()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Sign in failed.")
-      setIsLoading(false)
-    }
-  }
-
-  const inputClass = "h-12 w-full rounded-xl border border-border bg-background/55 px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/55 focus:border-sky-400/45 focus:ring-4 focus:ring-sky-400/[0.07]"
+  // Reset the button when the page is restored from the back-forward cache.
+  useEffect(() => {
+    const reset = () => setIsLoading(false)
+    window.addEventListener("pageshow", reset)
+    return () => window.removeEventListener("pageshow", reset)
+  }, [])
 
   return <main className="relative grid min-h-[100dvh] overflow-hidden bg-background lg:grid-cols-[1.08fr_0.92fr]">
     <div className="absolute right-4 top-4 z-30 sm:right-6 sm:top-6"><ThemeSwitcher /></div>
@@ -66,15 +57,11 @@ export default function AdminLogin() {
       <div className="w-full max-w-md">
         <div className="mb-9 lg:hidden"><AppBrand /></div>
         <div className="surface-card p-6 sm:p-8">
-          <div className="mb-7"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-border bg-foreground/[0.04] text-sky-600 dark:text-sky-300"><LockKeyhole className="h-5 w-5" /></div><p className="eyebrow mb-2">Organization account</p><h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Enter your NextPFM username and password to continue.</p></div>
+          <div className="mb-7"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-border bg-foreground/[0.04] text-sky-600 dark:text-sky-300"><LockKeyhole className="h-5 w-5" /></div><p className="eyebrow mb-2">Organization account</p><h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">You will be redirected to the secure NextPFM sign-in page.</p></div>
           {searchParams.get("passwordChanged") === "1" && <div role="status" className="mb-5 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.06] px-3.5 py-3 text-sm text-emerald-800 dark:text-emerald-200">Password changed. Sign in again with your new password.</div>}
-          <form onSubmit={submit} className="space-y-5">
-            <label className="block"><span className="mb-2 block text-xs font-medium text-muted-foreground">Username</span><input autoFocus autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required maxLength={255} className={inputClass} placeholder="Your username" /></label>
-            <label className="block"><span className="mb-2 block text-xs font-medium text-muted-foreground">Password</span><span className="relative block"><input type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required maxLength={1024} className={`${inputClass} pr-12`} placeholder="Your password" /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-1.5 top-1.5 grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition hover:bg-foreground/[0.04] hover:text-foreground" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></span></label>
-            {error && <div role="alert" className="rounded-xl border border-red-400/15 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
-            <button type="submit" disabled={isLoading || !username.trim() || !password} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-16px_rgba(14,165,233,0.75)] transition hover:-translate-y-0.5 hover:bg-sky-300 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Signing in…</> : <>Sign in securely<ArrowRight className="h-4 w-4" /></>}</button>
-          </form>
-          <a href="/api/auth/account" target="_blank" rel="noreferrer" className="mt-4 block text-center text-xs text-muted-foreground transition hover:text-sky-600 dark:hover:text-sky-300">Using a temporary password? Complete first-time setup</a>
+          {error && <div role="alert" className="mb-5 rounded-xl border border-red-400/15 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+          <a href={signInHref} onClick={() => setIsLoading(true)} aria-disabled={isLoading} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-16px_rgba(14,165,233,0.75)] transition hover:-translate-y-0.5 hover:bg-sky-300 aria-disabled:pointer-events-none aria-disabled:translate-y-0 aria-disabled:opacity-45">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Redirecting…</> : <>Sign in securely<ArrowRight className="h-4 w-4" /></>}</a>
+          <p className="mt-4 text-center text-xs leading-5 text-muted-foreground">Forgot your password or using a temporary one? Continue to sign in and follow the prompts.</p>
         </div>
         <Link href="/chat" className="mt-5 block text-center text-xs text-muted-foreground/70 transition hover:text-sky-600 dark:hover:text-sky-300">Continue without signing in</Link>
       </div>

@@ -1,10 +1,41 @@
 import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-import { ACCESS_TOKEN_COOKIE, DEVICE_ID_COOKIE, REFRESH_TOKEN_COOKIE, SESSION_COOKIE, SESSION_TTL_SECONDS, createSessionToken, secureCookie } from "@/lib/auth/session"
-import { PasswordAuthenticationError, decodeAccessClaims, exchangePassword, resolveApplicationRole } from "@/lib/auth/oidc"
+import { OIDC_TRANSACTION_COOKIE, OIDC_TRANSACTION_TTL_SECONDS, createOidcTransaction, secureCookie } from "@/lib/auth/session"
+import { PasswordAuthenticationError, exchangePassword, oidcAuthorizeUrl, oidcClientId, oidcRedirectUri, passwordLoginEnabled, pkceChallenge, randomUrlSafe } from "@/lib/auth/oidc"
+import { SessionConfigurationError, establishSession, safeRelativePath } from "@/lib/auth/establish-session"
 
+export const dynamic = "force-dynamic"
+
+// Starts the OIDC authorization code flow with PKCE (S256).
+export async function GET(request: Request) {
+  const responseHeaders = { "Cache-Control": "no-store", Pragma: "no-cache" }
+  const secret = process.env.NEXTPFM_SESSION_SECRET
+  if (!secret || secret.length < 32) return NextResponse.json({ error: "Session security is not configured." }, { status: 503, headers: responseHeaders })
+  const params = new URL(request.url).searchParams
+  const action = params.get("action") === "update-password" ? "UPDATE_PASSWORD" as const : undefined
+  const state = randomUrlSafe(), nonce = randomUrlSafe(), verifier = randomUrlSafe(48)
+  const transaction = await createOidcTransaction({ state, nonce, verifier, next: safeRelativePath(params.get("next")) ?? undefined, action }, secret)
+  const authorize = new URL(oidcAuthorizeUrl())
+  authorize.search = new URLSearchParams({
+    client_id: oidcClientId(),
+    response_type: "code",
+    scope: "openid",
+    redirect_uri: oidcRedirectUri(request),
+    state,
+    nonce,
+    code_challenge: await pkceChallenge(verifier),
+    code_challenge_method: "S256",
+  }).toString()
+  if (action) authorize.searchParams.set("kc_action", action)
+  if (params.get("prompt") === "login") authorize.searchParams.set("prompt", "login")
+  const response = NextResponse.redirect(authorize, { headers: responseHeaders })
+  response.cookies.set(OIDC_TRANSACTION_COOKIE, transaction, { httpOnly: true, secure: secureCookie(), sameSite: "lax", path: "/api/auth", maxAge: OIDC_TRANSACTION_TTL_SECONDS })
+  return response
+}
+
+// Legacy resource-owner password login. Disabled unless NEXTPFM_PASSWORD_LOGIN_ENABLED=true.
 export async function POST(request: Request) {
   const responseHeaders = { "Cache-Control": "no-store", Pragma: "no-cache" }
+  if (!passwordLoginEnabled()) return NextResponse.json({ error: "Password sign in is disabled. Use secure sign in." }, { status: 404, headers: responseHeaders })
   const body = await request.json().catch(() => null) as { username?: unknown; password?: unknown } | null
   if (typeof body?.username !== "string" || typeof body.password !== "string" || !body.username.trim() || !body.password) {
     return NextResponse.json({ error: "Username and password are required." }, { status: 400, headers: responseHeaders })
@@ -14,19 +45,10 @@ export async function POST(request: Request) {
   }
   try {
     const tokens = await exchangePassword(body.username.trim(), body.password)
-    const deviceId = cookies().get(DEVICE_ID_COOKIE)?.value ?? crypto.randomUUID()
-    const role = await resolveApplicationRole(tokens.access_token, deviceId)
-    const claims = decodeAccessClaims(tokens.access_token)
-    const secret = process.env.NEXTPFM_SESSION_SECRET
-    if (!secret || secret.length < 32) return NextResponse.json({ error: "Session security is not configured." }, { status: 503, headers: responseHeaders })
-    const session = await createSessionToken({ username: claims.preferred_username ?? body.username.trim(), organization: claims.organization_name, role }, secret)
-    const options = { httpOnly: true, secure: secureCookie(), sameSite: "lax" as const, path: "/" }
-    cookies().set(ACCESS_TOKEN_COOKIE, tokens.access_token, { ...options, maxAge: tokens.expires_in })
-    cookies().set(REFRESH_TOKEN_COOKIE, tokens.refresh_token, { ...options, maxAge: tokens.refresh_expires_in ?? SESSION_TTL_SECONDS })
-    cookies().set(SESSION_COOKIE, session, { ...options, maxAge: SESSION_TTL_SECONDS })
-    if (!cookies().get(DEVICE_ID_COOKIE)) cookies().set(DEVICE_ID_COOKIE, deviceId, { ...options, maxAge: 60 * 60 * 24 * 365 })
-    return NextResponse.json({ authenticated: true, username: claims.preferred_username ?? body.username.trim(), organization: claims.organization_name, role }, { headers: responseHeaders })
+    const session = await establishSession(tokens, body.username.trim())
+    return NextResponse.json({ authenticated: true, ...session }, { headers: responseHeaders })
   } catch (caught) {
+    if (caught instanceof SessionConfigurationError) return NextResponse.json({ error: caught.message }, { status: 503, headers: responseHeaders })
     if (caught instanceof PasswordAuthenticationError) return NextResponse.json({ error: caught.message }, { status: caught.status, headers: responseHeaders })
     return NextResponse.json({ error: "Your identity could not be authorized for this application." }, { status: 401, headers: responseHeaders })
   }
