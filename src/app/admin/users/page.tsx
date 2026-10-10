@@ -44,7 +44,7 @@ export default function UsersPage() {
         access_level: access,
         ...(access === "granted" ? { daily_chat_limit: limit ? Number(limit) : null } : {}),
       })
-      setSuccess(`${createFields.username.trim()} was provisioned in NextPFM and Keycloak.`)
+      setSuccess(`${createFields.username.trim()} was provisioned in PFMNext and Keycloak.`)
       setCreateFields(emptyCreate); setLimit(""); await load()
     } catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to provision user.") }
     finally { setBusy(false) }

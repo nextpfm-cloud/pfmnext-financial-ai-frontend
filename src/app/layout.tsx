@@ -3,7 +3,7 @@ import { Providers } from "./providers"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "NextPFM AI - Regulatory Document Assistant",
+  title: "PFMNext AI - Regulatory Document Assistant",
   description:
     "Ask questions about indexed regulatory documents and receive grounded, well-formatted responses with citations.",
 }

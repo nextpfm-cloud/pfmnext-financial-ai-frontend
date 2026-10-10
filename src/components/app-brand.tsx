@@ -9,7 +9,7 @@ export function AppBrand({ compact = false }: { compact?: boolean }) {
       </div>
       <div className={cn("min-w-0", compact && "hidden")}>
         <div className="flex items-center gap-1.5">
-          <span className="truncate text-[15px] font-semibold tracking-tight text-foreground">NextPFM</span>
+          <span className="truncate text-[15px] font-semibold tracking-tight text-foreground">PFMNext</span>
           <span className="rounded-md border border-sky-400/20 bg-sky-400/10 px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-sky-600 dark:text-sky-300">AI</span>
         </div>
         <p className="text-[11px] leading-4 text-muted-foreground">Regulatory intelligence</p>

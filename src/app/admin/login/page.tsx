@@ -51,13 +51,13 @@ export default function AdminLogin() {
           <div className="rounded-2xl border border-border bg-card/45 p-4"><Fingerprint className="mb-3 h-4 w-4 text-sky-600 dark:text-sky-300" /><p className="text-xs font-medium text-foreground">Role governed</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">Backend-enforced organization access.</p></div>
         </div>
       </div>
-      <p className="text-xs text-muted-foreground/70">NextPFM AI · Regulatory intelligence</p>
+      <p className="text-xs text-muted-foreground/70">PFMNext AI · Regulatory intelligence</p>
     </section>
     <section className="relative flex items-center justify-center px-4 py-12 sm:px-8">
       <div className="w-full max-w-md">
         <div className="mb-9 lg:hidden"><AppBrand /></div>
         <div className="surface-card p-6 sm:p-8">
-          <div className="mb-7"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-border bg-foreground/[0.04] text-sky-600 dark:text-sky-300"><LockKeyhole className="h-5 w-5" /></div><p className="eyebrow mb-2">Organization account</p><h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">You will be redirected to the secure NextPFM sign-in page.</p></div>
+          <div className="mb-7"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-border bg-foreground/[0.04] text-sky-600 dark:text-sky-300"><LockKeyhole className="h-5 w-5" /></div><p className="eyebrow mb-2">Organization account</p><h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">You will be redirected to the secure PFMNext sign-in page.</p></div>
           {searchParams.get("passwordChanged") === "1" && <div role="status" className="mb-5 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.06] px-3.5 py-3 text-sm text-emerald-800 dark:text-emerald-200">Password changed. Sign in again with your new password.</div>}
           {error && <div role="alert" className="mb-5 rounded-xl border border-red-400/15 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
           <a href={signInHref} onClick={() => setIsLoading(true)} aria-disabled={isLoading} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-16px_rgba(14,165,233,0.75)] transition hover:-translate-y-0.5 hover:bg-sky-300 aria-disabled:pointer-events-none aria-disabled:translate-y-0 aria-disabled:opacity-45">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Redirecting…</> : <>Sign in securely<ArrowRight className="h-4 w-4" /></>}</a>
