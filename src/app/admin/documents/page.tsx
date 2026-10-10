@@ -25,6 +25,6 @@ export default function AdminDocuments() {
       <div className="mt-[29px] flex items-center gap-[10px] overflow-x-auto pb-px">{categories.map((item) => <button type="button" key={item.tag} onClick={() => setCategory(item.tag)} aria-pressed={category === item.tag} className="chip shrink-0">{item.label}</button>)}</div>
     </section>
     {error && <div className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
-    <div className="mt-[29px]">{loading ? <div className="grid min-h-72 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600" /></div> : <DocumentTable documents={filtered} onDeleted={load} />}</div>
+    <div className="mt-[29px]">{loading ? <div className="grid min-h-72 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600" /></div> : <DocumentTable documents={filtered} onDeleted={load} resetKey={`${category}|${visibility}|${country}|${query}`} />}</div>
   </div>
 }
