@@ -77,11 +77,14 @@ export async function exchangePassword(username: string, password: string): Prom
   return data as TokenResponse
 }
 
-export async function refreshTokens(refreshToken: string): Promise<TokenResponse | null> {
+// "rejected" means the identity provider refused the refresh token (the sign-in session is over);
+// null means it could not be reached, so the session may still be valid.
+export async function refreshTokens(refreshToken: string): Promise<TokenResponse | "rejected" | null> {
   const body = clientCredentials(new URLSearchParams({ grant_type: "refresh_token", client_id: oidcClientId(), refresh_token: refreshToken }))
   try {
     const response = await fetch(oidcTokenUrl(), { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body, cache: "no-store" })
-    return response.ok ? response.json() : null
+    if (response.ok) return response.json()
+    return response.status === 400 || response.status === 401 ? "rejected" : null
   } catch { return null }
 }
 

@@ -1,5 +1,7 @@
 import { apiErrorMessage, DocumentChunksResponse, DocumentSummary, DocumentUploadResponse, DocumentVisibility } from "@/types"
+import { leaveIfAccessDenied } from "@/lib/access-denied"
 async function parse<T>(response: Response, fallback: string): Promise<T> {
+  await leaveIfAccessDenied(response)
   const data = await response.json().catch(() => null)
   if (!response.ok) throw new Error(apiErrorMessage(data, `${fallback} (${response.status})`))
   return data as T
