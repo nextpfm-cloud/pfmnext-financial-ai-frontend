@@ -2,88 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+/* PFMnext design tokens (Figma "Untitled", Oct 2026). Light is the designed theme; dark is derived. */
 @layer base {
   :root {
     color-scheme: light;
-    --background: 216 38% 97%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%;
+    --foreground: 204 19% 26%;            /* charcoal #36454f */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 204 19% 26%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 199 89% 48%;
-    --primary-foreground: 222 47% 8%;
-    --secondary: 214 32% 91%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 214 32% 91%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 199 89% 92%;
-    --accent-foreground: 201 96% 24%;
+    --popover-foreground: 204 19% 26%;
+    --primary: 192 74% 35%;               /* teal #178099 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 97%;                /* #f8f8f8 */
+    --secondary-foreground: 204 19% 26%;
+    --muted: 0 0% 96%;                    /* #f5f5f5 */
+    --muted-foreground: 0 0% 55%;         /* #8d8d8d */
+    --accent: 0 0% 96%;
+    --accent-foreground: 204 19% 26%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 87%;
-    --input: 214 32% 87%;
-    --ring: 199 89% 48%;
-    --radius: 0.75rem;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 91%;                   /* #e7e7e7 */
+    --input: 0 0% 88%;                    /* #e0e0e0 */
+    --ring: 192 74% 35%;
+    --radius: 0.625rem;                   /* 10px */
+    --brand-lime: 65 100% 36%;            /* #a8b600 */
+    --sidebar-background: 0 0% 95%;       /* #f3f3f3 */
+    --sidebar-footer: 0 2% 90%;           /* #e5e4e4 */
+    --surface: 0 0% 97%;                  /* #f8f8f8 */
+    --tab-active-border: 0 0% 78%;        /* #c7c7c7 */
   }
 
   .dark {
     color-scheme: dark;
-    --background: 220 45% 5%;
-    --foreground: 214 32% 91%;
-    --card: 222 30% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 32% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 198 93% 60%;
-    --primary-foreground: 202 100% 14%;
-    --secondary: 220 26% 14%;
-    --secondary-foreground: 214 32% 91%;
-    --muted: 220 24% 13%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 18%;
-    --accent-foreground: 199 95% 74%;
-    --destructive: 0 62% 42%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 215 27% 17%;
-    --input: 215 27% 18%;
-    --ring: 198 93% 60%;
+    --background: 200 14% 8%;
+    --foreground: 200 12% 88%;
+    --card: 200 13% 11%;
+    --card-foreground: 200 12% 92%;
+    --popover: 200 13% 12%;
+    --popover-foreground: 200 12% 92%;
+    --primary: 191 62% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 12% 14%;
+    --secondary-foreground: 200 12% 88%;
+    --muted: 200 12% 14%;
+    --muted-foreground: 200 8% 62%;
+    --accent: 200 12% 16%;
+    --accent-foreground: 200 12% 92%;
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 10% 20%;
+    --input: 200 10% 24%;
+    --ring: 191 62% 48%;
+    --brand-lime: 65 90% 42%;
+    --sidebar-background: 200 14% 10%;
+    --sidebar-footer: 200 13% 13%;
+    --surface: 200 12% 13%;
+    --tab-active-border: 200 8% 34%;
   }
 
   * { @apply border-border; }
   html, body { min-height: 100%; }
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    background-image: radial-gradient(circle at 64% 22%, rgba(14, 165, 233, 0.08), transparent 28rem), linear-gradient(180deg, rgba(15, 23, 42, 0.15), transparent 24rem);
-  }
-  ::selection { background: rgba(56, 189, 248, 0.28); color: #f8fafc; }
+  body { @apply bg-background font-sans text-foreground antialiased; }
+  ::selection { background: rgba(23, 128, 153, 0.22); }
 }
 
 @layer components {
-  .glass-panel {
-    @apply border border-border bg-card/80 backdrop-blur-xl;
-    box-shadow: 0 24px 80px -36px rgba(15, 23, 42, 0.35);
-  }
-  .surface-card {
-    @apply rounded-2xl border border-border bg-card/90;
-    box-shadow: 0 16px 50px -36px rgba(15, 23, 42, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-  .focus-glow:focus-within {
-    border-color: rgba(56, 189, 248, 0.42);
-    box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.08), 0 0 30px rgba(56, 189, 248, 0.1);
-  }
-  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground; }
-}
-
-.dark .surface-card {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  /* Main content card: white, lime outline, 17px radius */
+  .surface-card { @apply rounded-[17px] border bg-card; border-color: hsl(var(--brand-lime)); }
+  /* Grey tool panel (filters, form sections): #f8f8f8, hairline border, 10px radius */
+  .tool-panel { @apply rounded-[10px] border; background: hsl(var(--surface)); border-color: hsl(0 0% 94%); }
+  .dark .tool-panel { border-color: hsl(var(--border)); }
+  .glass-panel { @apply border border-border bg-card; }
+  .focus-glow:focus-within { border-color: rgba(23, 128, 153, 0.45); }
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground; }
+  /* Page heading block used on every admin screen */
+  .page-title { @apply text-[28px] font-medium leading-tight text-foreground sm:text-4xl; }
+  .page-subtitle { @apply mt-1.5 text-sm font-medium text-muted-foreground; }
+  /* Pill tabs / pill controls in the top bar and filters */
+  .pill-tab { @apply inline-flex h-[35px] min-w-[141px] items-center justify-center rounded-full border px-5 text-sm font-medium text-foreground transition; border-color: hsl(0 0% 94%); }
+  .pill-tab:hover { background: hsl(var(--surface)); }
+  .pill-tab[aria-current="page"] { background: hsl(var(--surface)); border-color: hsl(var(--tab-active-border)); }
+  .dark .pill-tab { border-color: hsl(var(--border)); }
+  .chip { @apply inline-flex h-[25px] min-w-[76px] items-center justify-center rounded-full border border-input bg-card px-3 text-xs font-medium text-foreground transition; }
+  .chip[aria-pressed="true"] { @apply border-sky-400 bg-sky-400 text-white; }
+  /* Primary pill button (Sign in securely, form actions) */
+  .btn-primary { @apply inline-flex h-[43px] items-center justify-center gap-2 rounded-full bg-sky-400 px-6 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50; }
+  /* Small square utility button on the right edge (27px, #efefef outline) */
+  .util-button { @apply grid h-[27px] w-[27px] place-items-center rounded-md border bg-background text-muted-foreground transition hover:text-foreground; border-color: hsl(0 0% 94%); }
+  .dark .util-button { border-color: hsl(var(--border)); }
+  /* Figma icons are single-colour files; lift the dark ones in dark mode */
+  .dark .icon-dark { filter: invert(1) brightness(1.4); }
 }
 
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(100, 116, 139, 0.28); }
-::-webkit-scrollbar-thumb:hover { background: rgba(125, 211, 252, 0.35); }
+::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(141, 141, 141, 0.32); }
+::-webkit-scrollbar-thumb:hover { background: rgba(23, 128, 153, 0.4); }
 :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
 @keyframes beacon-pulse {

@@ -78,7 +78,7 @@ export default function UsersPage() {
   }
 
   return <div className="space-y-6">
-    <div><p className="eyebrow mb-2">Organization access</p><h2 className="text-2xl font-semibold sm:text-3xl">Users, credentials and quotas</h2><p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Provision the application user and Keycloak identity together, assign permissions, and manage temporary credentials.</p></div>
+    <div><h2 className="page-title">Users, credentials and quotas</h2><p className="page-subtitle max-w-3xl">Provision the application user and Keycloak identity together, assign permissions, and manage temporary credentials.</p></div>
 
     <form onSubmit={create} className="surface-card space-y-4 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">Provision user</h3><p className="mt-1 text-xs text-muted-foreground">The temporary password is sent once and is never stored or returned.</p></div><div className="rounded-full border border-amber-400/20 bg-amber-400/[0.06] px-3 py-1 text-[10px] font-medium text-amber-800 dark:text-amber-200">Forced change on first login</div></div>

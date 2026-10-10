@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { ArrowRight, Fingerprint, Loader2, LockKeyhole, ShieldCheck } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { AppBrand } from "@/components/app-brand"
+import { FigmaIcon } from "@/components/figma-icon"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 
 const SIGN_IN_ERRORS: Record<string, string> = {
@@ -36,35 +37,31 @@ export default function AdminLogin() {
     return () => window.removeEventListener("pageshow", reset)
   }, [])
 
-  return <main className="relative grid min-h-[100dvh] overflow-hidden bg-background lg:grid-cols-[1.08fr_0.92fr]">
-    <div className="absolute right-4 top-4 z-30 sm:right-6 sm:top-6"><ThemeSwitcher /></div>
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_42%,rgba(14,165,233,0.16),transparent_30rem),radial-gradient(circle_at_82%_12%,rgba(99,102,241,0.07),transparent_23rem)]" />
-    <section className="relative hidden flex-col justify-between border-r border-border p-10 lg:flex xl:p-16">
-      <AppBrand />
-      <div className="max-w-xl">
-        <div className="mb-7 grid h-16 w-16 place-items-center rounded-2xl border border-sky-400/20 bg-sky-400/10 text-sky-600 shadow-[0_0_60px_rgba(56,189,248,0.16)] dark:text-sky-300"><ShieldCheck className="h-7 w-7" /></div>
-        <p className="eyebrow mb-4 text-sky-600 dark:text-sky-300/70">Governed access</p>
-        <h1 className="text-5xl font-semibold leading-[1.08] tracking-[-0.04em] text-foreground">Regulatory operations, securely governed.</h1>
-        <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">Sign in to your organization workspace to manage trusted sources, user access, quotas, and audit activity.</p>
-        <div className="mt-9 grid max-w-lg grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-border bg-card/45 p-4"><LockKeyhole className="mb-3 h-4 w-4 text-sky-600 dark:text-sky-300" /><p className="text-xs font-medium text-foreground">Secure sessions</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">HttpOnly tokens with automatic refresh.</p></div>
-          <div className="rounded-2xl border border-border bg-card/45 p-4"><Fingerprint className="mb-3 h-4 w-4 text-sky-600 dark:text-sky-300" /><p className="text-xs font-medium text-foreground">Role governed</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">Backend-enforced organization access.</p></div>
+  return <main className="relative min-h-[100dvh] bg-background">
+    <div className="absolute left-[22px] top-4"><AppBrand /></div>
+    <div className="absolute right-4 top-4 z-30"><ThemeSwitcher /></div>
+    <div className="mx-auto grid min-h-[100dvh] max-w-[1440px] items-center gap-10 px-5 pb-12 pt-24 lg:grid-cols-[1fr_560px] lg:gap-[99px] lg:pl-[136px] lg:pr-[113px] lg:pt-12">
+      <section className="hidden lg:block">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/x-mark.svg" alt="" aria-hidden="true" width={231} height={196} className="ml-[100px] h-[196px] w-[231px]" />
+        <h1 className="mt-[17px] text-[40px] font-medium leading-[50px] text-sky-600">Regulatory operations,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>securely governed.</span></h1>
+        <p className="mt-[19px] max-w-[532px] text-sm font-medium leading-[18px] text-muted-foreground">Sign in to your organization workspace to manage trusted sources, user access, quotas and audit activity.</p>
+        <div className="mt-[79px] flex gap-x-[40px] whitespace-nowrap xl:gap-x-[53px]">
+          <div className="flex items-start gap-[10px]"><FigmaIcon name="shield-check" className="mt-1" /><div><p className="text-[15px] font-medium leading-[19px] text-sky-600">Secure sessions</p><p className="mt-1 text-[10px] font-medium leading-[13px] text-muted-foreground">HttpOnly tokens with automatic refresh.</p></div></div>
+          <div className="flex items-start gap-[11px]"><FigmaIcon name="lock" className="mt-[5px]" /><div><p className="text-[15px] font-medium leading-[19px] text-sky-600">Role governed</p><p className="mt-1 text-[10px] font-medium leading-[13px] text-muted-foreground">Backend-enforced organization access.</p></div></div>
         </div>
-      </div>
-      <p className="text-xs text-muted-foreground/70">PFMNext AI · Regulatory intelligence</p>
-    </section>
-    <section className="relative flex items-center justify-center px-4 py-12 sm:px-8">
-      <div className="w-full max-w-md">
-        <div className="mb-9 lg:hidden"><AppBrand /></div>
-        <div className="surface-card p-6 sm:p-8">
-          <div className="mb-7"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-border bg-foreground/[0.04] text-sky-600 dark:text-sky-300"><LockKeyhole className="h-5 w-5" /></div><p className="eyebrow mb-2">Organization account</p><h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">You will be redirected to the secure PFMNext sign-in page.</p></div>
-          {searchParams.get("passwordChanged") === "1" && <div role="status" className="mb-5 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.06] px-3.5 py-3 text-sm text-emerald-800 dark:text-emerald-200">Password changed. Sign in again with your new password.</div>}
-          {error && <div role="alert" className="mb-5 rounded-xl border border-red-400/15 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
-          <a href={signInHref} onClick={() => setIsLoading(true)} aria-disabled={isLoading} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-16px_rgba(14,165,233,0.75)] transition hover:-translate-y-0.5 hover:bg-sky-300 aria-disabled:pointer-events-none aria-disabled:translate-y-0 aria-disabled:opacity-45">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Redirecting…</> : <>Sign in securely<ArrowRight className="h-4 w-4" /></>}</a>
-          <p className="mt-4 text-center text-xs leading-5 text-muted-foreground">Forgot your password or using a temporary one? Continue to sign in and follow the prompts.</p>
-        </div>
-        <Link href="/chat" className="mt-5 block text-center text-xs text-muted-foreground/70 transition hover:text-sky-600 dark:hover:text-sky-300">Continue without signing in</Link>
-      </div>
-    </section>
+      </section>
+
+      <section className="mx-auto w-full max-w-[560px] rounded-[17px] border-2 border-[#f0efef] bg-card px-6 pb-[42px] pt-[54px] text-center dark:border-border sm:px-[69px]">
+        <p className="text-sm text-foreground">Organization Account</p>
+        <h2 className="mt-[17px] text-4xl font-medium leading-[45px] text-foreground">Welcome back</h2>
+        <p className="mx-auto mt-[17px] max-w-[380px] text-sm leading-[18px] text-foreground">You will be redirected to the secure PFMNext sign-in page to enter your username and password.</p>
+        {searchParams.get("passwordChanged") === "1" && <div role="status" className="mt-6 rounded-[10px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3.5 py-3 text-sm text-emerald-800 dark:text-emerald-200">Password changed. Sign in again with your new password.</div>}
+        {error && <div role="alert" className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+        <a href={signInHref} onClick={() => setIsLoading(true)} aria-disabled={isLoading} className="btn-primary mt-[46px] min-w-[145px] aria-disabled:pointer-events-none aria-disabled:opacity-50">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Redirecting…</> : "Sign in securely"}</a>
+        <p className="mx-auto mt-[30px] max-w-[417px] text-sm font-medium leading-[18px] text-muted-foreground">Using a temporary password or forgot it? Continue to sign in and follow the prompts.</p>
+        <Link href="/chat" className="mt-[28px] inline-block text-sm font-medium text-muted-foreground transition hover:text-sky-600">Continue without signing in</Link>
+      </section>
+    </div>
   </main>
 }

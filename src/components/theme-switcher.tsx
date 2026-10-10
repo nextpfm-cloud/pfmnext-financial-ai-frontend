@@ -32,15 +32,15 @@ export function ThemeSwitcher({ align = "right" }: { align?: "left" | "right" })
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="grid h-9 w-9 place-items-center rounded-xl border border-border bg-foreground/[0.03] text-muted-foreground transition hover:border-sky-400/25 hover:text-sky-600 dark:hover:text-sky-300"
+        className="util-button"
         aria-label="Choose color theme"
         aria-haspopup="menu"
         aria-expanded={open}
       >
-        <CurrentIcon className="h-4 w-4" />
+        <CurrentIcon className="h-3.5 w-3.5" />
       </button>
       {open && (
-        <div role="menu" className={`absolute top-11 z-[70] w-40 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-2xl ${align === "right" ? "right-0" : "left-0"}`}>
+        <div role="menu" className={`absolute top-9 z-[70] w-40 rounded-xl border border-border bg-popover p-1.5 text-popover-foreground shadow-2xl ${align === "right" ? "right-0" : "left-0"}`}>
           {options.map(({ value, label, icon: Icon }) => (
             <button
               type="button"

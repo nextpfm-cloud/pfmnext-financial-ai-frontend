@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
-import { Activity, ArrowUpRight, Database, FileStack, ShieldCheck, Layers3, Loader2, ScanText } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { FigmaIcon } from "@/components/figma-icon"
 import { fetchDocuments } from "@/lib/services/document-service"
 import { fetchHealth } from "@/lib/services/health-service"
 import type { DocumentSummary, HealthResponse } from "@/types"
@@ -18,13 +19,42 @@ export default function AdminDashboard() {
   }, [])
 
   const metrics = useMemo(() => [
-    { label: "Indexed documents", value: documents.length, helper: "Across the regulatory corpus", icon: FileStack, tone: "text-sky-600 dark:text-sky-300 bg-sky-400/10" },
-    { label: "Processed chunks", value: documents.reduce((total, item) => total + item.chunk_count, 0).toLocaleString(), helper: "Available for vector retrieval", icon: Layers3, tone: "text-indigo-300 bg-indigo-400/10" },
-    { label: "Pages scanned", value: documents.reduce((total, item) => total + item.page_count, 0).toLocaleString(), helper: "OCR and native text layers", icon: ScanText, tone: "text-cyan-300 bg-cyan-400/10" },
-    { label: "Public sources", value: documents.filter((item) => item.visibility === "public").length, helper: "Governed for anonymous access", icon: ShieldCheck, tone: "text-emerald-700 dark:text-emerald-300 bg-emerald-400/10" },
+    { label: "Indexed documents", value: documents.length, helper: "Across the regulatory corpus", icon: "stat-documents", iconClass: "" },
+    { label: "Processed chunks", value: documents.reduce((total, item) => total + item.chunk_count, 0).toLocaleString(), helper: "Available for vector retrieval", icon: "stat-chunks", iconClass: "" },
+    { label: "Pages scanned", value: documents.reduce((total, item) => total + item.page_count, 0).toLocaleString(), helper: "OCR and native text layers", icon: "stat-pages", iconClass: "-scale-y-100" },
+    { label: "Public sources", value: documents.filter((item) => item.visibility === "public").length, helper: "Open to anonymous access", icon: "stat-sources", iconClass: "" },
   ], [documents])
 
-  if (loading) return <div className="grid min-h-[60vh] place-items-center"><div className="flex items-center gap-3 text-sm text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin text-sky-600 dark:text-sky-300" />Loading corpus intelligence…</div></div>
+  if (loading) return <div className="grid min-h-[60vh] place-items-center"><div className="flex items-center gap-3 text-sm font-medium text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin text-sky-600" />Loading corpus intelligence…</div></div>
 
-  return <div className="space-y-7"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="eyebrow mb-2">Regulatory corpus</p><h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">Intelligence overview</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Live operational visibility across indexed documents and retrieval-ready content.</p></div><div className={`flex w-fit items-center gap-2 rounded-full border px-3 py-2 font-mono text-[11px] ${health?.status === "ok" ? "border-emerald-400/15 bg-emerald-400/[0.05] text-emerald-700 dark:text-emerald-300" : "border-amber-400/15 bg-amber-400/[0.05] text-amber-700 dark:text-amber-300"}`}><span className={`h-1.5 w-1.5 rounded-full ${health?.status === "ok" ? "bg-emerald-400" : "bg-amber-400"}`} />FastAPI :10106 · {health?.database ?? "unavailable"}</div></div>{error && <div className="rounded-xl border border-red-400/15 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{metrics.map(({ label, value, helper, icon: Icon, tone }) => <div key={label} className="surface-card relative overflow-hidden p-5"><div className="flex items-start justify-between"><div><p className="eyebrow">{label}</p><p className="mt-4 text-3xl font-semibold tracking-tight text-foreground">{value}</p></div><div className={`grid h-11 w-11 place-items-center rounded-xl ${tone}`}><Icon className="h-5 w-5" /></div></div><p className="mt-5 border-t border-border pt-3 text-xs text-muted-foreground/70">{helper}</p></div>)}</div><div className="grid gap-5 xl:grid-cols-[1.5fr_0.75fr]"><section className="surface-card overflow-hidden"><div className="flex items-center justify-between border-b border-border px-5 py-4"><div><h3 className="text-sm font-semibold text-foreground/90">Recently indexed</h3><p className="mt-1 text-xs text-muted-foreground/70">Latest additions to the vector store</p></div><Link href="/admin/documents" className="flex items-center gap-1 text-xs text-sky-600 dark:text-sky-300">View registry <ArrowUpRight className="h-3.5 w-3.5" /></Link></div><div className="divide-y divide-white/[0.05]">{documents.length ? [...documents].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 6).map((document) => <Link href={`/admin/documents/${document.document_id}`} key={document.document_id} className="flex items-center gap-3 px-5 py-4 transition hover:bg-foreground/[0.025]"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-400/[0.07] text-sky-600 dark:text-sky-300"><FileStack className="h-4 w-4" /></div><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-foreground/80">{document.file_name}</p><p className="mt-1 text-[11px] text-muted-foreground/70">{document.category_label} · {document.page_count} pages · {document.chunk_count} chunks</p></div><span className="hidden text-[11px] text-muted-foreground/70 sm:block">{new Date(document.created_at).toLocaleDateString()}</span></Link>) : <p className="px-5 py-12 text-center text-sm text-muted-foreground/70">No documents indexed yet.</p>}</div></section><aside className="surface-card p-5"><div className="flex items-center gap-3"><div className="grid h-10 w-10 place-items-center rounded-xl bg-emerald-400/10 text-emerald-700 dark:text-emerald-300"><Activity className="h-5 w-5" /></div><div><h3 className="text-sm font-semibold text-foreground/90">System health</h3><p className="text-xs text-muted-foreground/70">Runtime dependencies</p></div></div><div className="mt-6 space-y-3">{[["API service", health?.status === "ok"], ["PostgreSQL", health?.database === "connected"], ["Vector registry", documents.length >= 0]].map(([label, active]) => <div key={String(label)} className="flex items-center justify-between rounded-xl bg-background/50 px-3 py-3 text-xs"><span className="flex items-center gap-2 text-muted-foreground">{label === "PostgreSQL" ? <Database className="h-3.5 w-3.5" /> : <Activity className="h-3.5 w-3.5" />}{label}</span><span className={active ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}>{active ? "Operational" : "Check service"}</span></div>)}</div></aside></div></div>
+  const healthy = health?.status === "ok" && health?.database === "connected"
+  return <div>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div><h2 className="page-title">Intelligence overview</h2><p className="page-subtitle">Live operational visibility across indexed documents and retrieval-ready content.</p></div>
+      <p className="flex w-fit items-center gap-2 text-[10px] font-medium text-muted-foreground" title={`API ${health?.status ?? "unavailable"} · database ${health?.database ?? "unavailable"}`}><span className={`h-1.5 w-1.5 rounded-full ${healthy ? "bg-emerald-500" : "bg-amber-500"}`} />{healthy ? "All services operational" : "Service check needed"}</p>
+    </div>
+    {error && <div className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+
+    <div className="mt-10 grid gap-x-[24.5px] gap-y-4 sm:grid-cols-2 lg:mt-[62px] xl:grid-cols-4">
+      {metrics.map(({ label, value, helper, icon, iconClass }, index) => <div key={label} className="relative h-[135px] rounded-[10px] border bg-[hsl(var(--surface))] pl-[23px] pr-[14px] pt-[20px]" style={{ borderColor: index % 2 === 0 ? "#178099" : "hsl(var(--brand-lime))" }}>
+        <div className="flex items-start justify-between"><p className="text-[15px] font-semibold leading-[19px] text-foreground">{label}</p><FigmaIcon name={icon} dark className={iconClass} /></div>
+        <p className="mt-[5px] text-[41px] font-medium leading-[52px] text-foreground">{value}</p>
+        <p className="ml-1 mr-[9px] whitespace-nowrap border-t border-foreground/50 pt-[5px] text-xs font-medium leading-[15px] text-foreground">{helper}</p>
+      </div>)}
+    </div>
+
+    <section className="surface-card mt-10 px-5 pb-8 pt-[29px] sm:px-[42px] lg:mt-14">
+      <div className="flex items-start justify-between gap-4 border-b border-[#efefef] pb-[10px] dark:border-border">
+        <div><h3 className="text-base font-medium leading-5 text-foreground">Recently indexed</h3><p className="mt-[5px] text-xs font-medium text-muted-foreground">Latest additions to the vector store</p></div>
+        <Link href="/admin/documents" className="mt-2 flex items-center gap-[7px] text-xs font-medium text-sky-400 hover:text-sky-700">View registry <FigmaIcon name="external-link" size={18} /></Link>
+      </div>
+      <div className="pt-[14px]">
+        {documents.length ? [...documents].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 7).map((document) => <Link href={`/admin/documents/${document.document_id}`} key={document.document_id} className="-mx-2 flex h-[51px] items-center gap-[13px] rounded-[10px] px-2 transition hover:bg-[hsl(var(--surface))]">
+          <FigmaIcon name="document" size={18} className="ml-[6px] self-start mt-[9px]" />
+          <div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold leading-[15px] text-foreground">{document.file_name}</p><p className="mt-[3px] truncate text-[10px] font-medium leading-[13px] text-muted-foreground">{document.category_label} · {document.page_count} pages · {document.chunk_count} chunks</p></div>
+          <span className="hidden self-start pt-[10px] text-[10px] font-medium text-muted-foreground sm:block">{new Date(document.created_at).toLocaleDateString()}</span>
+        </Link>) : <p className="py-12 text-center text-sm font-medium text-muted-foreground">No documents indexed yet.</p>}
+      </div>
+    </section>
+  </div>
 }

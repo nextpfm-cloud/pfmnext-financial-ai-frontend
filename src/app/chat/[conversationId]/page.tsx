@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { BookOpenCheck, Building2, Compass, Landmark, Loader2, ScrollText } from "lucide-react"
+import { BookOpenCheck, Building2, Landmark, Loader2, ScrollText, X } from "lucide-react"
+import { FigmaIcon } from "@/components/figma-icon"
 import { ChatSidebar } from "@/components/chat-sidebar"
 import { ChatHeader } from "@/components/chat-header"
 import { ChatComposer } from "@/components/chat/composer"
@@ -43,6 +44,7 @@ export default function ChatConversationPage() {
   const [loadingConversation, setLoadingConversation] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [helpOpen, setHelpOpen] = useState(false)
   const endRef = useRef<HTMLDivElement>(null)
   const retryRef = useRef<{ question: string; key: string } | null>(null)
 
@@ -162,15 +164,44 @@ export default function ChatConversationPage() {
     if (question) setCurrentMessage(question.content)
   }
 
+  const composer = <ChatComposer onSend={() => void sendQuestion()} initialValue={currentMessage} onChange={setCurrentMessage} isLoading={isLoading || session === undefined} selectedCategories={selectedCategories} onCategoriesChange={updateCategories} selectedCountries={selectedCountries} onCountriesChange={setSelectedCountries} topK={topK} onTopKChange={setTopK} />
+  const isEmpty = !loadingConversation && messages.length === 0
+
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-background">
       <ChatSidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative flex min-w-0 flex-1 flex-col">
         <ChatHeader />
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          {loadingConversation ? <div className="grid h-full place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600 dark:text-sky-300" /></div> : messages.length === 0 ? <section className="mx-auto flex min-h-full max-w-5xl flex-col items-center justify-center px-4 py-10 sm:px-8"><div className="relative mb-7 grid h-20 w-20 place-items-center rounded-full border border-sky-400/15 bg-card/70 text-sky-600 dark:text-sky-300 shadow-[0_0_80px_rgba(14,165,233,0.18)]"><div className="beacon-pulse absolute inset-2 rounded-full border border-sky-400/25" /><Compass className="relative h-7 w-7" /></div><h1 className="text-center text-3xl font-semibold tracking-[-0.03em] text-foreground sm:text-5xl">Regulatory clarity, on demand.</h1><p className="mt-4 max-w-2xl text-center text-sm leading-6 text-muted-foreground sm:text-base">{session?.authenticated ? "Ask a question to begin a private, persistent conversation with contextual follow-ups." : "Search acts, gazettes, circulars and policy guidance through one grounded intelligence workspace."}</p>{error && <div className="mt-5 rounded-xl border border-red-400/15 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}<div className="mt-10 grid w-full max-w-3xl gap-3 sm:grid-cols-2">{suggestions.map(({ icon: Icon, title, detail }) => <button type="button" key={title} onClick={() => setCurrentMessage(title)} className="group flex items-start gap-3 rounded-2xl border border-border bg-card/45 p-4 text-left transition hover:-translate-y-0.5 hover:border-sky-400/20 hover:bg-card/80"><span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-sky-400/[0.07] text-sky-600 dark:text-sky-300"><Icon className="h-4 w-4" /></span><span><span className="block text-sm font-medium leading-5 text-foreground/90">{title}</span><span className="mt-1 block text-xs text-muted-foreground/70">{detail}</span></span></button>)}</div></section> : <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6 sm:py-12">{messages.map((message) => <ChatMessageComponent key={message.id} id={message.id} role={message.role} content={message.content} status={message.status} citations={message.citations} usedCategories={message.usedCategories} onDelete={deleteMessage} onRetry={retryMessage} onCopy={(content) => navigator.clipboard.writeText(content)} />)}{isLoading && <div className="flex items-center gap-3 text-sm text-muted-foreground"><div className="grid h-8 w-8 place-items-center rounded-xl border border-sky-400/15 bg-sky-400/[0.07]"><Loader2 className="h-4 w-4 animate-spin text-sky-600 dark:text-sky-300" /></div>Reviewing indexed sources and conversation context…</div>}{error && <div className="rounded-xl border border-red-400/15 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}<div ref={endRef} /></div>}
-        </main>
-        <ChatComposer onSend={() => void sendQuestion()} initialValue={currentMessage} onChange={setCurrentMessage} isLoading={isLoading || session === undefined} selectedCategories={selectedCategories} onCategoriesChange={updateCategories} selectedCountries={selectedCountries} onCountriesChange={setSelectedCountries} topK={topK} onTopKChange={setTopK} />
+        {isEmpty ? (
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div className="my-auto pb-[clamp(0px,5.5vh,3.5rem)]">
+              <section className="mx-auto flex max-w-[640px] flex-col items-center px-4 text-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/brand/x-mark-glow.png" alt="" aria-hidden="true" width={160} height={136} className="h-[136px] w-[160px]" />
+                <h1 className="-mt-2.5 text-[32px] font-bold leading-[1.26] text-sky-600 sm:text-[40px]">Regulatory clarity,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>on demand.</span></h1>
+                <p className="mt-[31px] max-w-[360px] text-sm font-medium leading-[18px] text-muted-foreground">{session?.authenticated ? "Ask a question to begin a private, persistent conversation with contextual follow-ups." : "Search acts, gazettes, circulars and policy guidance through one grounded intelligence workspace."}</p>
+                {error && <div className="mt-5 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+              </section>
+              <div className="mt-[clamp(2rem,9.5vh,6.0625rem)]">{composer}</div>
+            </div>
+          </main>
+        ) : (
+          <>
+            <main className="min-h-0 flex-1 overflow-y-auto">
+              {loadingConversation ? <div className="grid h-full place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600" /></div> : <div className="mx-auto max-w-[740px] space-y-8 px-4 py-8 sm:px-6 sm:py-10">{messages.map((message) => <ChatMessageComponent key={message.id} id={message.id} role={message.role} content={message.content} status={message.status} citations={message.citations} usedCategories={message.usedCategories} onDelete={deleteMessage} onRetry={retryMessage} onCopy={(content) => navigator.clipboard.writeText(content)} />)}{isLoading && <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin text-sky-600" />Reviewing indexed sources and conversation context…</div>}{error && <div className="rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}<div ref={endRef} /></div>}
+            </main>
+            {composer}
+          </>
+        )}
+
+        {/* Help: example questions */}
+        <div className="absolute bottom-10 right-10 z-20 hidden lg:block">
+          {helpOpen && <div role="dialog" aria-label="Example questions" className="absolute bottom-[52px] right-0 w-[320px] rounded-[17px] border border-border bg-popover p-4 shadow-[0_2px_10px_rgba(0,0,0,0.12)]">
+            <div className="mb-2 flex items-center justify-between"><p className="text-sm font-semibold text-foreground">Try asking</p><button type="button" onClick={() => setHelpOpen(false)} className="grid h-6 w-6 place-items-center text-muted-foreground" aria-label="Close"><X className="h-3.5 w-3.5" /></button></div>
+            <div className="space-y-1">{suggestions.map(({ icon: Icon, title, detail }) => <button type="button" key={title} onClick={() => { setCurrentMessage(title); setHelpOpen(false) }} className="flex w-full items-start gap-3 rounded-[10px] p-2 text-left transition hover:bg-muted"><Icon className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" /><span><span className="block text-xs font-semibold leading-4 text-foreground">{title}</span><span className="mt-0.5 block text-[10px] font-medium text-muted-foreground">{detail}</span></span></button>)}</div>
+          </div>}
+          <button type="button" onClick={() => setHelpOpen((open) => !open)} aria-expanded={helpOpen} aria-label="Example questions" className="grid h-10 w-10 place-items-center rounded-full border border-[#efefef] bg-background transition hover:bg-muted dark:border-border"><FigmaIcon name="help-mark" dark /></button>
+        </div>
       </div>
     </div>
   )

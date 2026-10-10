@@ -1,12 +1,47 @@
 "use client"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Activity, CheckCircle2, Filter, Loader2, ShieldAlert, XCircle } from "lucide-react"
+import Link from "next/link"
+import { Activity, Loader2, ShieldAlert, XCircle } from "lucide-react"
+import { FigmaIcon } from "@/components/figma-icon"
 import { fetchAuditEvents } from "@/lib/services/admin-service"
 import type { AuditEvent } from "@/types"
+
 export default function AuditPage() {
-  const [events, setEvents] = useState<AuditEvent[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState<string | null>(null); const [action, setAction] = useState("")
+  const [events, setEvents] = useState<AuditEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [action, setAction] = useState("")
   const load = useCallback(async () => { setLoading(true); setError(null); try { setEvents(await fetchAuditEvents(action ? { action } : undefined)) } catch (e) { setError(e instanceof Error ? e.message : "Unable to load audit events.") } finally { setLoading(false) } }, [action])
   useEffect(() => { void load() }, [load])
   const actions = useMemo(() => Array.from(new Set(events.map((item) => item.action))).sort(), [events])
-  return <div className="space-y-6"><div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="eyebrow mb-2">Append-only activity</p><h2 className="text-2xl font-semibold sm:text-3xl">Audit trail</h2><p className="mt-2 text-sm text-muted-foreground">Organization-scoped access, governance, and chat outcomes with request correlation.</p></div><label className="flex items-center gap-2 text-xs text-muted-foreground"><Filter className="h-4 w-4" /><select value={action} onChange={(e) => setAction(e.target.value)} className="h-10 rounded-xl border border-border bg-card px-3"><option value="">All actions</option>{actions.map((value) => <option key={value}>{value}</option>)}</select></label></div>{error && <div className="rounded-xl border border-red-400/15 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}{loading ? <div className="grid min-h-64 place-items-center"><Loader2 className="h-6 w-6 animate-spin" /></div> : <section className="surface-card overflow-hidden"><div className="divide-y divide-border">{events.map((event) => <article key={event.audit_event_id} className="grid gap-3 p-4 transition hover:bg-foreground/[0.02] sm:grid-cols-[auto_1fr_auto]"><div className={`grid h-9 w-9 place-items-center rounded-xl ${event.outcome === "success" ? "bg-emerald-400/10 text-emerald-600" : event.outcome === "denied" ? "bg-amber-400/10 text-amber-600" : "bg-red-400/10 text-red-600"}`}>{event.outcome === "success" ? <CheckCircle2 className="h-4 w-4" /> : event.outcome === "denied" ? <ShieldAlert className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}</div><div className="min-w-0"><p className="text-sm font-semibold">{event.action}</p><p className="mt-1 break-all font-mono text-[10px] text-muted-foreground">request {event.request_id}{event.resource_id ? ` · ${event.resource_type} ${event.resource_id}` : ""}</p>{Object.keys(event.metadata).length > 0 && <p className="mt-2 truncate text-xs text-muted-foreground">{JSON.stringify(event.metadata)}</p>}</div><div className="text-left sm:text-right"><p className="text-xs capitalize text-muted-foreground">{event.outcome} · {event.http_status ?? "—"}</p><p className="mt-1 text-[10px] text-muted-foreground">{new Date(event.occurred_at).toLocaleString()}</p></div></article>)}{events.length === 0 && <div className="grid min-h-64 place-items-center text-sm text-muted-foreground"><Activity className="mb-3 h-6 w-6" />No matching events.</div>}</div></section>}</div>
+
+  return <div>
+    <Link href="/admin" aria-label="Back to admin console" className="-ml-3 hidden w-fit transition hover:opacity-70 lg:block"><FigmaIcon name="back" dark /></Link>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between lg:mt-[35px]">
+      <div><h2 className="page-title">Audit trail</h2><p className="page-subtitle">Organization scoped access, governance and chat outcomes with request correlation</p></div>
+      <label className="relative block w-[194px] shrink-0">
+        <FigmaIcon name="filter" className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" />
+        <select aria-label="Filter by action" value={action} onChange={(e) => setAction(e.target.value)} className="h-[35px] w-full appearance-none rounded-[10px] border border-[#8d8d8d] bg-[hsl(var(--surface))] pl-[39px] pr-8 text-xs font-light text-muted-foreground outline-none focus:border-sky-400"><option value="">All actions</option>{actions.map((value) => <option key={value}>{value}</option>)}</select>
+        <FigmaIcon name="chevron-down" className="pointer-events-none absolute right-[15px] top-1/2 -translate-y-1/2 -scale-y-100" />
+      </label>
+    </div>
+    {error && <div className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+    {loading ? <div className="grid min-h-64 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600" /></div> : <section className="surface-card mt-[37px] px-5 py-2 sm:pl-[41px] sm:pr-[50px]">
+      <div className="divide-y divide-[#efefef] dark:divide-border">
+        {events.map((event) => <article key={event.audit_event_id} className="grid items-center gap-x-[26px] gap-y-2 py-[14px] sm:grid-cols-[24px_1fr_auto]">
+          {event.outcome === "success" ? <FigmaIcon name="audit-check" /> : event.outcome === "denied" ? <ShieldAlert className="h-6 w-6 text-amber-500" strokeWidth={1.5} /> : <XCircle className="h-6 w-6 text-red-500" strokeWidth={1.5} />}
+          <div className="min-w-0">
+            <p className="text-xs font-semibold leading-[15px] text-foreground">{event.action.replace(/[._]/g, " ")}</p>
+            <p className="mt-[3px] break-all text-[10px] font-medium leading-[13px] text-muted-foreground">request {event.request_id}{event.resource_id ? ` · ${event.resource_type} ${event.resource_id}` : ""}</p>
+            {Object.keys(event.metadata).length > 0 && <p className="mt-1 truncate text-[10px] font-medium leading-[13px] text-muted-foreground">{JSON.stringify(event.metadata)}</p>}
+          </div>
+          <div className="self-start text-left text-[10px] font-medium text-muted-foreground sm:text-right">
+            <p className="capitalize leading-[13px]">{event.outcome} :&nbsp; {event.http_status ?? "—"}</p>
+            <p className="mt-[9px] leading-[13px]">{new Date(event.occurred_at).toLocaleString()}</p>
+          </div>
+        </article>)}
+        {events.length === 0 && <div className="grid min-h-64 place-items-center text-sm font-medium text-muted-foreground"><span className="flex flex-col items-center"><Activity className="mb-3 h-6 w-6" />No matching events.</span></div>}
+      </div>
+    </section>}
+  </div>
 }
