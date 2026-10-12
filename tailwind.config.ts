@@ -12,7 +12,13 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+      },
       colors: {
+        // PFMnext brand (Figma). "sky" is remapped to the brand teal so existing accent classes follow the brand.
+        brand: { teal: "#178099", "teal-text": "#1c839b", lime: "#a8b600", charcoal: "#36454f" },
+        sky: { 50: "#f0f8fa", 100: "#dff1f5", 200: "#b8dfe8", 300: "#3d9fb6", 400: "#178099", 500: "#178099", 600: "#1c839b", 700: "#14697e", 800: "#115666", 900: "#0d434f" },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -1,83 +1,67 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
-import { ArrowRight, Eye, EyeOff, Fingerprint, Loader2, LockKeyhole, ShieldCheck } from "lucide-react"
+import { useSearchParams } from "next/navigation"
+import { Loader2 } from "lucide-react"
 import { AppBrand } from "@/components/app-brand"
+import { FigmaIcon } from "@/components/figma-icon"
 import { ThemeSwitcher } from "@/components/theme-switcher"
-import type { UserRole } from "@/types"
+
+const SIGN_IN_ERRORS: Record<string, string> = {
+  expired: "Your sign-in attempt expired. Please try again.",
+  denied: "Sign in was cancelled.",
+  unauthorized: "Your identity could not be authorized for this application.",
+  unavailable: "Authentication service is unavailable. Please try again shortly.",
+  configuration: "Session security is not configured.",
+  failed: "Sign in failed. Please try again.",
+}
 
 export default function AdminLogin() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const [username, setUsername] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const errorCode = searchParams.get("error")
+  const error = errorCode ? SIGN_IN_ERRORS[errorCode] ?? SIGN_IN_ERRORS.failed : null
+  const signInParams = new URLSearchParams()
+  const requested = searchParams.get("next")
+  if (requested) signInParams.set("next", requested)
+  // After a failed attempt, force the credential prompt so a different account can be used.
+  if (errorCode) signInParams.set("prompt", "login")
+  const signInQuery = signInParams.toString()
+  const signInHref = `/api/auth/login${signInQuery ? `?${signInQuery}` : ""}`
 
-  const submit = async (event: React.FormEvent) => {
-    event.preventDefault()
-    if (isLoading) return
-    setIsLoading(true)
-    setError(null)
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      })
-      const result = await response.json().catch(() => ({})) as { error?: string; role?: UserRole }
-      if (!response.ok) throw new Error(result.error || "Sign in failed.")
-      const requested = searchParams.get("next")
-      const safeRequested = requested?.startsWith("/") && !requested.startsWith("//") ? requested : null
-      const destination = safeRequested?.startsWith("/account") ? safeRequested : result.role === "admin"
-        ? safeRequested?.startsWith("/admin") ? safeRequested : "/admin"
-        : result.role === "auditor" ? "/admin/audit" : "/chat"
-      router.replace(destination)
-      router.refresh()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Sign in failed.")
-      setIsLoading(false)
-    }
-  }
+  // Reset the button when the page is restored from the back-forward cache.
+  useEffect(() => {
+    const reset = () => setIsLoading(false)
+    window.addEventListener("pageshow", reset)
+    return () => window.removeEventListener("pageshow", reset)
+  }, [])
 
-  const inputClass = "h-12 w-full rounded-xl border border-border bg-background/55 px-3.5 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/55 focus:border-sky-400/45 focus:ring-4 focus:ring-sky-400/[0.07]"
-
-  return <main className="relative grid min-h-[100dvh] overflow-hidden bg-background lg:grid-cols-[1.08fr_0.92fr]">
-    <div className="absolute right-4 top-4 z-30 sm:right-6 sm:top-6"><ThemeSwitcher /></div>
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_22%_42%,rgba(14,165,233,0.16),transparent_30rem),radial-gradient(circle_at_82%_12%,rgba(99,102,241,0.07),transparent_23rem)]" />
-    <section className="relative hidden flex-col justify-between border-r border-border p-10 lg:flex xl:p-16">
-      <AppBrand />
-      <div className="max-w-xl">
-        <div className="mb-7 grid h-16 w-16 place-items-center rounded-2xl border border-sky-400/20 bg-sky-400/10 text-sky-600 shadow-[0_0_60px_rgba(56,189,248,0.16)] dark:text-sky-300"><ShieldCheck className="h-7 w-7" /></div>
-        <p className="eyebrow mb-4 text-sky-600 dark:text-sky-300/70">Governed access</p>
-        <h1 className="text-5xl font-semibold leading-[1.08] tracking-[-0.04em] text-foreground">Regulatory operations, securely governed.</h1>
-        <p className="mt-6 max-w-lg text-base leading-7 text-muted-foreground">Sign in to your organization workspace to manage trusted sources, user access, quotas, and audit activity.</p>
-        <div className="mt-9 grid max-w-lg grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-border bg-card/45 p-4"><LockKeyhole className="mb-3 h-4 w-4 text-sky-600 dark:text-sky-300" /><p className="text-xs font-medium text-foreground">Secure sessions</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">HttpOnly tokens with automatic refresh.</p></div>
-          <div className="rounded-2xl border border-border bg-card/45 p-4"><Fingerprint className="mb-3 h-4 w-4 text-sky-600 dark:text-sky-300" /><p className="text-xs font-medium text-foreground">Role governed</p><p className="mt-1 text-[11px] leading-5 text-muted-foreground">Backend-enforced organization access.</p></div>
+  return <main className="relative min-h-[100dvh] bg-background">
+    <div className="absolute left-[22px] top-4"><AppBrand /></div>
+    <div className="absolute right-4 top-4 z-30"><ThemeSwitcher /></div>
+    <div className="mx-auto grid min-h-[100dvh] max-w-[1440px] items-center gap-10 px-5 pb-12 pt-24 lg:grid-cols-[1fr_560px] lg:gap-[99px] lg:pl-[136px] lg:pr-[113px] lg:pt-12">
+      <section className="hidden lg:block">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/brand/x-mark.svg" alt="" aria-hidden="true" width={231} height={196} className="ml-[100px] h-[196px] w-[231px]" />
+        <h1 className="mt-[17px] text-[40px] font-medium leading-[50px] text-sky-600">Regulatory operations,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>securely governed.</span></h1>
+        <p className="mt-[19px] max-w-[532px] text-sm font-medium leading-[18px] text-muted-foreground">Sign in to your organization workspace to manage trusted sources, user access, quotas and audit activity.</p>
+        <div className="mt-[79px] flex gap-x-[40px] whitespace-nowrap xl:gap-x-[53px]">
+          <div className="flex items-start gap-[10px]"><FigmaIcon name="shield-check" className="mt-1" /><div><p className="text-[15px] font-medium leading-[19px] text-sky-600">Secure sessions</p><p className="mt-1 text-[10px] font-medium leading-[13px] text-muted-foreground">HttpOnly tokens with automatic refresh.</p></div></div>
+          <div className="flex items-start gap-[11px]"><FigmaIcon name="lock" className="mt-[5px]" /><div><p className="text-[15px] font-medium leading-[19px] text-sky-600">Role governed</p><p className="mt-1 text-[10px] font-medium leading-[13px] text-muted-foreground">Backend-enforced organization access.</p></div></div>
         </div>
-      </div>
-      <p className="text-xs text-muted-foreground/70">NextPFM AI · Regulatory intelligence</p>
-    </section>
-    <section className="relative flex items-center justify-center px-4 py-12 sm:px-8">
-      <div className="w-full max-w-md">
-        <div className="mb-9 lg:hidden"><AppBrand /></div>
-        <div className="surface-card p-6 sm:p-8">
-          <div className="mb-7"><div className="mb-5 grid h-11 w-11 place-items-center rounded-xl border border-border bg-foreground/[0.04] text-sky-600 dark:text-sky-300"><LockKeyhole className="h-5 w-5" /></div><p className="eyebrow mb-2">Organization account</p><h2 className="text-2xl font-semibold tracking-tight text-foreground">Welcome back</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">Enter your NextPFM username and password to continue.</p></div>
-          {searchParams.get("passwordChanged") === "1" && <div role="status" className="mb-5 rounded-xl border border-emerald-400/15 bg-emerald-400/[0.06] px-3.5 py-3 text-sm text-emerald-800 dark:text-emerald-200">Password changed. Sign in again with your new password.</div>}
-          <form onSubmit={submit} className="space-y-5">
-            <label className="block"><span className="mb-2 block text-xs font-medium text-muted-foreground">Username</span><input autoFocus autoComplete="username" value={username} onChange={(event) => setUsername(event.target.value)} required maxLength={255} className={inputClass} placeholder="Your username" /></label>
-            <label className="block"><span className="mb-2 block text-xs font-medium text-muted-foreground">Password</span><span className="relative block"><input type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required maxLength={1024} className={`${inputClass} pr-12`} placeholder="Your password" /><button type="button" onClick={() => setShowPassword((visible) => !visible)} className="absolute right-1.5 top-1.5 grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition hover:bg-foreground/[0.04] hover:text-foreground" aria-label={showPassword ? "Hide password" : "Show password"}>{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button></span></label>
-            {error && <div role="alert" className="rounded-xl border border-red-400/15 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
-            <button type="submit" disabled={isLoading || !username.trim() || !password} className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-400 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-16px_rgba(14,165,233,0.75)] transition hover:-translate-y-0.5 hover:bg-sky-300 disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Signing in…</> : <>Sign in securely<ArrowRight className="h-4 w-4" /></>}</button>
-          </form>
-          <a href="/api/auth/account" target="_blank" rel="noreferrer" className="mt-4 block text-center text-xs text-muted-foreground transition hover:text-sky-600 dark:hover:text-sky-300">Using a temporary password? Complete first-time setup</a>
-        </div>
-        <Link href="/chat" className="mt-5 block text-center text-xs text-muted-foreground/70 transition hover:text-sky-600 dark:hover:text-sky-300">Continue without signing in</Link>
-      </div>
-    </section>
+      </section>
+
+      <section className="mx-auto w-full max-w-[560px] rounded-[17px] border-2 border-[#f0efef] bg-card px-6 pb-[42px] pt-[54px] text-center dark:border-border sm:px-[69px]">
+        <p className="text-sm text-foreground">Organization Account</p>
+        <h2 className="mt-[17px] text-4xl font-medium leading-[45px] text-foreground">Welcome back</h2>
+        <p className="mx-auto mt-[17px] max-w-[380px] text-sm leading-[18px] text-foreground">You will be redirected to the secure PFMNext sign-in page to enter your username and password.</p>
+        {searchParams.get("passwordChanged") === "1" && <div role="status" className="mt-6 rounded-[10px] border border-emerald-500/20 bg-emerald-500/[0.06] px-3.5 py-3 text-sm text-emerald-800 dark:text-emerald-200">Password changed. Sign in again with your new password.</div>}
+        {error && <div role="alert" className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-3.5 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+        <a href={signInHref} onClick={() => setIsLoading(true)} aria-disabled={isLoading} className="btn-primary mt-[46px] min-w-[145px] aria-disabled:pointer-events-none aria-disabled:opacity-50">{isLoading ? <><Loader2 className="h-4 w-4 animate-spin" />Redirecting…</> : "Sign in securely"}</a>
+        <p className="mx-auto mt-[30px] max-w-[417px] text-sm font-medium leading-[18px] text-muted-foreground">Using a temporary password or forgot it? Continue to sign in and follow the prompts.</p>
+        <Link href="/chat" className="mt-[28px] inline-block text-sm font-medium text-muted-foreground transition hover:text-sky-600">Continue without signing in</Link>
+      </section>
+    </div>
   </main>
 }

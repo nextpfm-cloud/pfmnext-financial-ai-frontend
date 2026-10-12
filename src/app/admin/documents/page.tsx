@@ -1,6 +1,7 @@
 "use client"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Filter, Loader2, Search } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import { FigmaIcon } from "@/components/figma-icon"
 import { DocumentTable } from "@/components/admin/document-table"
 import { fetchDocuments } from "@/lib/services/document-service"
 import type { DocumentSummary, DocumentVisibility } from "@/types"
@@ -10,6 +11,20 @@ export default function AdminDocuments() {
   const load = useCallback(async () => { setLoading(true); setError(null); try { setDocuments(await fetchDocuments({ category: category || null, country: country.length === 2 ? country : null, visibility: visibility || null })) } catch (caught) { setError(caught instanceof Error ? caught.message : "Unable to load documents.") } finally { setLoading(false) } }, [category, country, visibility])
   useEffect(() => { void load() }, [load])
   const filtered = useMemo(() => documents.filter((document) => `${document.file_name} ${document.document_id} ${document.source_url}`.toLowerCase().includes(query.toLowerCase())), [documents, query])
-  const control = "h-10 rounded-xl border border-border bg-background/50 px-3 text-xs text-foreground outline-none"
-  return <div className="space-y-6"><div><p className="eyebrow mb-2">Governed source registry</p><h2 className="text-2xl font-semibold sm:text-3xl">Regulatory documents</h2><p className="mt-2 text-sm text-muted-foreground">Search and maintain organization-scoped sources, jurisdiction, visibility, and canonical links.</p></div><section className="surface-card space-y-3 p-3 sm:p-4"><div className="flex flex-col gap-3 lg:flex-row"><label className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, ID, or source URL…" className="h-11 w-full rounded-xl border border-border bg-background/50 pl-10 pr-3 text-sm outline-none" /></label><div className="flex gap-2"><input aria-label="Country filter" value={country} onChange={(e) => setCountry(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2))} placeholder="Country" className={`${control} w-24`} /><select aria-label="Visibility filter" value={visibility} onChange={(e) => setVisibility(e.target.value as "" | DocumentVisibility)} className={control}><option value="">All visibility</option><option value="public">Public</option><option value="internal">Internal</option></select></div></div><div className="flex items-center gap-2 overflow-x-auto"><Filter className="h-4 w-4 shrink-0 text-muted-foreground" />{categories.map((item) => <button key={item.tag} onClick={() => setCategory(item.tag)} className={`shrink-0 rounded-full border px-3 py-2 text-xs ${category === item.tag ? "border-sky-400/25 bg-sky-400/15 text-sky-700 dark:text-sky-200" : "border-border text-muted-foreground"}`}>{item.label}</button>)}</div></section>{error && <div className="rounded-xl border border-red-400/15 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}{loading ? <div className="grid min-h-72 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600" /></div> : <DocumentTable documents={filtered} onDeleted={load} />}</div>
+  const pillControl = "h-[35px] w-[141px] rounded-full border border-input bg-card px-4 text-center text-sm font-medium text-foreground outline-none placeholder:text-foreground focus:border-sky-400"
+  return <div>
+    <div><h2 className="page-title">Regulatory documents</h2><p className="page-subtitle">Search and maintain organization-scoped sources, jurisdiction, visibility, and canonical links.</p></div>
+    <section className="tool-panel mt-10 px-4 pb-[18px] pt-5 sm:px-[30px] lg:mt-[clamp(2.5rem,11vh,7rem)]">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-[19px]">
+        <label className="relative block flex-1"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, ID or source URL..." aria-label="Search documents" className="h-[51px] w-full rounded-[10px] border border-[#e5e5e5] bg-card pl-5 pr-14 text-sm text-foreground outline-none placeholder:text-xs placeholder:font-light placeholder:text-muted-foreground focus:border-sky-400 dark:border-border" /><FigmaIcon name="search-lg" className="pointer-events-none absolute right-[26px] top-1/2 -translate-y-1/2" /></label>
+        <div className="flex gap-[27px]">
+          <input aria-label="Country filter" value={country} onChange={(e) => setCountry(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, 2))} placeholder="Country" className={pillControl} />
+          <select aria-label="Visibility filter" value={visibility} onChange={(e) => setVisibility(e.target.value as "" | DocumentVisibility)} className={`${pillControl} appearance-none [text-align-last:center]`}><option value="">All visibility</option><option value="public">Public</option><option value="internal">Internal</option></select>
+        </div>
+      </div>
+      <div className="mt-[29px] flex items-center gap-[10px] overflow-x-auto pb-px">{categories.map((item) => <button type="button" key={item.tag} onClick={() => setCategory(item.tag)} aria-pressed={category === item.tag} className="chip shrink-0">{item.label}</button>)}</div>
+    </section>
+    {error && <div className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
+    <div className="mt-[29px]">{loading ? <div className="grid min-h-72 place-items-center"><Loader2 className="h-6 w-6 animate-spin text-sky-600" /></div> : <DocumentTable documents={filtered} onDeleted={load} resetKey={`${category}|${visibility}|${country}|${query}`} />}</div>
+  </div>
 }

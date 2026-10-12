@@ -3,7 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "@/components/ui/toaster"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { showAccessNotice } from "@/lib/access-denied"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -19,11 +20,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }),
   )
 
+  // Explains a redirect away from the admin console (see leaveIfAccessDenied).
+  useEffect(() => { showAccessNotice() }, [])
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
         attribute="class"
-        defaultTheme="system"
+        defaultTheme="light"
         enableSystem
         disableTransitionOnChange
       >

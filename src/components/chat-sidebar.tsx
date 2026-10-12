@@ -1,10 +1,11 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, Edit3, Loader2, LogIn, MessageSquare, Plus, Search, Settings, ShieldCheck, Trash2, X } from "lucide-react"
+import { Edit3, Loader2, Trash2, X } from "lucide-react"
 import { AppBrand } from "@/components/app-brand"
+import { FigmaIcon } from "@/components/figma-icon"
 import { createConversationRepository } from "@/lib/repositories"
 import { deleteConversation, fetchConversationPage, renameConversation } from "@/lib/services/conversation-service"
 import type { AppSession } from "@/types"
@@ -24,6 +25,8 @@ export function ChatSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [renamingId, setRenamingId] = useState<string | null>(null)
   const [renameValue, setRenameValue] = useState("")
+  const [closedGroups, setClosedGroups] = useState<string[]>([])
+  const searchRef = useRef<HTMLInputElement>(null)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -63,6 +66,15 @@ export function ChatSidebar() {
       window.removeEventListener("nextpfm:conversations-changed", refresh)
     }
   }, [loadConversations])
+
+  // ⌘K / Ctrl+K focuses the conversation search, as hinted in the search field.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") { event.preventDefault(); setCollapsed(false); window.setTimeout(() => searchRef.current?.focus(), 0) }
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [])
 
   const grouped = useMemo(() => {
     const startToday = new Date().setHours(0, 0, 0, 0)
@@ -119,30 +131,60 @@ export function ChatSidebar() {
     finally { setLoadingOlder(false) }
   }
 
+  const toggleGroup = (label: string) => setClosedGroups((current) => current.includes(label) ? current.filter((item) => item !== label) : [...current, label])
+  const isActive = (id: string) => pathname === `/chat/${id}`
+
   return (
     <>
-      {mobileOpen && <button type="button" aria-label="Close conversation menu" className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />}
-      <aside className={`fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col border-r border-border bg-card/98 transition-all duration-300 lg:static lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "w-[76px]" : "w-[280px]"}`}>
-        <div className="flex h-16 items-center justify-between px-4">
+      {mobileOpen && <button type="button" aria-label="Close conversation menu" className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMobileOpen(false)} />}
+      <aside className={`fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "w-[76px]" : "w-[280px]"}`}>
+        <div className={`flex h-[79px] shrink-0 items-start pt-4 ${collapsed ? "flex-col items-center gap-3 px-2" : "justify-between pl-[22px] pr-[19px]"}`}>
           <AppBrand compact={collapsed} />
-          <button type="button" onClick={() => setCollapsed((value) => !value)} className="hidden h-8 w-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-foreground/[0.05] hover:text-foreground/90 lg:grid" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}>{collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}</button>
+          <button type="button" onClick={() => setCollapsed((value) => !value)} className={`hidden h-7 w-7 place-items-center rounded-md transition hover:bg-foreground/[0.06] lg:grid ${collapsed ? "" : "mt-0.5"}`} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}><FigmaIcon name="sidebar-toggle" dark /></button>
           <button type="button" onClick={() => setMobileOpen(false)} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground lg:hidden" aria-label="Close sidebar"><X className="h-4 w-4" /></button>
         </div>
 
-        <div className="space-y-3 px-3 pb-4 pt-2">
-          <button type="button" onClick={() => void createChat()} className={`flex h-11 w-full items-center rounded-xl border border-sky-400/15 bg-sky-400/[0.07] text-sm font-medium text-sky-700 transition hover:border-sky-400/30 hover:bg-sky-400/10 dark:text-sky-200 ${collapsed ? "justify-center" : "justify-center gap-2"}`}><Plus className="h-4 w-4" /> {!collapsed && "New chat"}</button>
-          {!collapsed && <label className="relative block"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search conversations" className="h-10 w-full rounded-xl border border-border bg-foreground/[0.025] pl-9 pr-3 text-sm text-foreground/90 outline-none placeholder:text-muted-foreground/70 focus:border-sky-400/25" /></label>}
+        <div className={`shrink-0 ${collapsed ? "px-[21px] pt-10" : "px-[44px] pt-[clamp(1.5rem,9.4vh,6rem)]"}`}>
+          <button type="button" onClick={() => void createChat()} className={`flex h-[35px] items-center justify-center gap-[13px] rounded-[13px] bg-sky-400 text-sm font-medium text-white transition hover:bg-sky-700 ${collapsed ? "w-[35px]" : "w-full"}`} aria-label="New chat"><FigmaIcon name="new-chat" />{!collapsed && "New chat"}</button>
+          {!collapsed && <label className="relative mt-[clamp(1rem,8.4vh,5.375rem)] block">
+            <FigmaIcon name="search" className="absolute left-[7px] top-1/2 -translate-y-1/2" />
+            <input ref={searchRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search chat" aria-label="Search conversations" className="h-[35px] w-full rounded-[13px] border bg-muted pl-[34px] pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-[hsl(var(--brand-lime))]" style={{ borderColor: "hsl(var(--brand-lime))" }} />
+            {!searchQuery && <FigmaIcon name="cmd-k" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-60" dark />}
+          </label>}
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
-          {loading ? <div className="grid h-24 place-items-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div> : collapsed ? <div className="space-y-2">{conversations.slice(0, 7).map((conversation) => <button type="button" key={conversation.id} title={conversation.title} onClick={() => router.push(`/chat/${conversation.id}`)} className={`grid h-10 w-full place-items-center rounded-xl ${pathname === `/chat/${conversation.id}` ? "bg-sky-400/10 text-sky-600 dark:text-sky-300" : "text-muted-foreground/70 hover:bg-foreground/[0.04] hover:text-foreground/80"}`}><MessageSquare className="h-4 w-4" /></button>)}</div> : <>{Object.entries(grouped).map(([label, items]) => items.length > 0 && <section key={label} className="mb-5"><h2 className="eyebrow mb-2 px-2">{label}</h2><div className="space-y-1">{items.map((conversation) => <div key={conversation.id} className={`group relative rounded-xl ${pathname === `/chat/${conversation.id}` ? "bg-foreground/[0.075]" : "hover:bg-foreground/[0.035]"}`}>{renamingId === conversation.id ? <input autoFocus maxLength={120} value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onBlur={() => void renameChat(conversation.id)} onKeyDown={(event) => { if (event.key === "Enter") void renameChat(conversation.id); if (event.key === "Escape") setRenamingId(null) }} className="h-10 w-full rounded-xl bg-foreground/[0.05] px-3 text-sm outline-none" /> : <button type="button" onClick={() => { setMobileOpen(false); router.push(`/chat/${conversation.id}`) }} className="flex h-10 w-full items-center gap-2.5 px-3 pr-16 text-left text-sm text-muted-foreground"><MessageSquare className={`h-4 w-4 shrink-0 ${pathname === `/chat/${conversation.id}` ? "text-sky-600 dark:text-sky-300" : "text-muted-foreground/70"}`} /><span className="truncate">{conversation.title}</span></button>}<div className="absolute right-1 top-1 hidden items-center group-hover:flex"><button type="button" onClick={() => { setRenamingId(conversation.id); setRenameValue(conversation.title) }} className="grid h-8 w-7 place-items-center text-muted-foreground hover:text-sky-600 dark:hover:text-sky-300" aria-label="Rename chat"><Edit3 className="h-3.5 w-3.5" /></button><button type="button" onClick={() => void deleteChat(conversation.id)} className="grid h-8 w-7 place-items-center text-muted-foreground hover:text-red-600 dark:hover:text-red-300" aria-label="Delete chat"><Trash2 className="h-3.5 w-3.5" /></button></div></div>)}</div></section>)}{nextCursor && <button type="button" disabled={loadingOlder} onClick={() => void loadOlder()} className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-border text-xs text-muted-foreground">{loadingOlder && <Loader2 className="h-3.5 w-3.5 animate-spin" />}Load older</button>}{error && <p className="px-2 py-2 text-xs leading-5 text-red-600 dark:text-red-300">{error}</p>}</>}
+        <div className={`min-h-0 flex-1 overflow-y-auto pb-4 pt-[34px] ${collapsed ? "px-[21px]" : "pl-[32px] pr-4"}`}>
+          {loading ? <div className="grid h-24 place-items-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div> : collapsed ? <div className="flex flex-col items-center gap-3">{conversations.slice(0, 9).map((conversation) => <button type="button" key={conversation.id} title={conversation.title} onClick={() => router.push(`/chat/${conversation.id}`)} className="grid h-6 w-6 place-items-center rounded-full hover:bg-foreground/[0.06]" aria-label={conversation.title}><span className={`block rounded-full ${isActive(conversation.id) ? "h-[9px] w-[9px] bg-sky-400" : "h-[7px] w-[7px]"}`} style={isActive(conversation.id) ? undefined : { background: "hsl(var(--brand-lime))" }} /></button>)}</div> : <>
+            {Object.entries(grouped).map(([label, items]) => {
+              if (items.length === 0) return null
+              const open = !closedGroups.includes(label)
+              return <section key={label} className="mb-[26px]">
+                <button type="button" onClick={() => toggleGroup(label)} aria-expanded={open} className="flex items-center gap-2 text-[10px] font-semibold text-[#939292]">{label}<FigmaIcon name="chevron-down" className={open ? "-scale-y-100" : "rotate-90"} /></button>
+                {open && <div className="relative ml-3 mt-[7px] border-l border-sky-400/70 pb-px pt-[28px]">
+                  <span className="absolute -left-[4px] -top-px h-[7px] w-[7px] rounded-full" style={{ background: "hsl(var(--brand-lime))" }} />
+                  {items.map((conversation) => <div key={conversation.id} className="group relative flex h-[31px] items-center">
+                    <span className="absolute -left-[4px] top-1/2 h-[7px] w-[7px] -translate-y-1/2 rounded-full" style={{ background: "hsl(var(--brand-lime))" }} />
+                    {renamingId === conversation.id
+                      ? <input autoFocus maxLength={120} value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onBlur={() => void renameChat(conversation.id)} onKeyDown={(event) => { if (event.key === "Enter") void renameChat(conversation.id); if (event.key === "Escape") setRenamingId(null) }} className="ml-4 h-7 w-full rounded-md border border-input bg-background px-2 text-sm outline-none" />
+                      : <button type="button" onClick={() => { setMobileOpen(false); router.push(`/chat/${conversation.id}`) }} className={`min-w-0 flex-1 truncate pl-4 pr-12 text-left text-sm transition hover:text-foreground ${isActive(conversation.id) ? "font-medium text-foreground" : "text-muted-foreground"}`}>{conversation.title}</button>}
+                    <div className="absolute right-0 top-1/2 hidden -translate-y-1/2 items-center bg-sidebar group-hover:flex">
+                      <button type="button" onClick={() => { setRenamingId(conversation.id); setRenameValue(conversation.title) }} className="grid h-7 w-6 place-items-center text-muted-foreground hover:text-sky-600" aria-label="Rename chat"><Edit3 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => void deleteChat(conversation.id)} className="grid h-7 w-6 place-items-center text-muted-foreground hover:text-red-600" aria-label="Delete chat"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
+                  </div>)}
+                </div>}
+              </section>
+            })}
+            {!loading && conversations.length === 0 && <p className="pr-4 text-xs leading-5 text-muted-foreground">No conversations yet.</p>}
+            {nextCursor && <button type="button" disabled={loadingOlder} onClick={() => void loadOlder()} className="flex h-8 items-center gap-2 text-[10px] font-semibold text-[#939292] hover:text-foreground">{loadingOlder && <Loader2 className="h-3 w-3 animate-spin" />}Load older<FigmaIcon name="chevron-down" className="rotate-90" /></button>}
+            {error && <p className="py-2 pr-4 text-xs leading-5 text-red-600 dark:text-red-300">{error}</p>}
+          </>}
         </div>
 
-        <div className="space-y-2 border-t border-border p-3">
-          <Link href="/admin" className={`flex h-10 items-center rounded-xl text-sm text-foreground/80 transition hover:bg-foreground/[0.04] ${collapsed ? "justify-center" : "gap-3 px-3"}`}><ShieldCheck className="h-4 w-4 text-sky-600 dark:text-sky-300" />{!collapsed && <span className="flex-1">Admin portal</span>}</Link>
-          {session?.authenticated && <Link href="/account" className={`flex h-10 items-center rounded-xl text-sm text-foreground/80 transition hover:bg-foreground/[0.04] ${collapsed ? "justify-center" : "gap-3 px-3"}`}><Settings className="h-4 w-4 text-sky-600 dark:text-sky-300" />{!collapsed && <span className="flex-1">Account settings</span>}</Link>}
-          {!collapsed && <div className="flex items-center justify-between px-3 py-1 text-xs text-muted-foreground/70"><span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />{session?.authenticated ? "Synced history" : "Local history"}</span><LogIn className="h-3.5 w-3.5" /></div>}
-        </div>
+        {!collapsed && <div className="flex h-[76px] shrink-0 flex-col justify-center gap-[10px] pl-[55px] text-xs font-medium text-foreground" style={{ background: "hsl(var(--sidebar-footer))" }}>
+          {(session?.role === "admin" || session?.role === "auditor" || !session?.authenticated) && <Link href={session?.role === "auditor" ? "/admin/audit" : "/admin"} className="w-fit hover:text-sky-600">Admin portal</Link>}
+          {session?.authenticated ? <Link href="/account" className="w-fit hover:text-sky-600">Account settings</Link> : <Link href="/admin/login?next=/chat" className="w-fit hover:text-sky-600">Sign in</Link>}
+        </div>}
       </aside>
     </>
   )
