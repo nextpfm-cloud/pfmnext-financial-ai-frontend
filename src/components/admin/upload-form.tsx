@@ -3,7 +3,7 @@ import { useRef, useState } from "react"
 import { FileText, Globe2, Link2, Loader2, UploadCloud, X } from "lucide-react"
 import { uploadDocument } from "@/lib/services/document-service"
 import type { DocumentVisibility } from "@/types"
-const categories = [{ tag: "acts", label: "Acts" }, { tag: "gazettes", label: "Gazettes" }, { tag: "circulars", label: "Circulars" }, { tag: "guidelines", label: "Guidelines & action plans" }]
+const categories = [{ tag: "action_plan", label: "Action Plan" }, { tag: "performance_report", label: "Performance Report" }, { tag: "budget", label: "Budget" }, { tag: "others", label: "Others" }]
 export function UploadForm({ onComplete }: { onComplete: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null); const [file, setFile] = useState<File | null>(null); const [category, setCategory] = useState(""); const [country, setCountry] = useState("LK"); const [visibility, setVisibility] = useState<DocumentVisibility>("internal"); const [sourceUrl, setSourceUrl] = useState(""); const [uploading, setUploading] = useState(false); const [error, setError] = useState<string | null>(null)
   const chooseFile = (selected?: File) => { if (!selected) return; if (selected.type !== "application/pdf") return setError("Only PDF documents are supported."); if (selected.size > 50 * 1024 * 1024) return setError("The PDF must be smaller than 50 MiB."); setFile(selected); setError(null) }

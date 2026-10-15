@@ -27,5 +27,5 @@ export default function ChatPage() {
       .catch(() => setError("Your conversation workspace could not be opened."))
   }, [router])
 
-  return <main className="grid min-h-screen place-items-center bg-background px-6 text-center"><div>{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/x-mark.svg" alt="" aria-hidden="true" className={`mx-auto mb-5 h-14 w-auto ${error ? "" : "beacon-pulse"}`} /><p className="text-sm font-medium text-muted-foreground">{error ?? "Opening your regulatory workspace…"}</p></div></main>
+  return <main className="grid min-h-screen place-items-center bg-background px-6 text-center"><div>{/* eslint-disable-next-line @next/next/no-img-element */}<img src="/brand/x-mark.svg" alt="" aria-hidden="true" className={`mx-auto mb-5 h-14 w-auto ${error ? "" : "beacon-pulse"}`} /><p className="text-sm font-medium text-muted-foreground">{error ?? "Opening your finance workspace…"}</p></div></main>
 }

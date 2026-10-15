@@ -11,7 +11,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher"
 const SIGN_IN_ERRORS: Record<string, string> = {
   expired: "Your sign-in attempt expired. Please try again.",
   denied: "Sign in was cancelled.",
-  unauthorized: "Your identity could not be authorized for this application.",
+  unauthorized: "Your account does not have access to PFMNext Finance AI. Ask a Finance AI administrator to grant it.",
   unavailable: "Authentication service is unavailable. Please try again shortly.",
   configuration: "Session security is not configured.",
   failed: "Sign in failed. Please try again.",
@@ -44,7 +44,7 @@ export default function AdminLogin() {
       <section className="hidden lg:block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/brand/x-mark.svg" alt="" aria-hidden="true" width={231} height={196} className="ml-[100px] h-[196px] w-[231px]" />
-        <h1 className="mt-[17px] text-[40px] font-medium leading-[50px] text-sky-600">Regulatory operations,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>securely governed.</span></h1>
+        <h1 className="mt-[17px] text-[40px] font-medium leading-[50px] text-sky-600">Financial intelligence,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>securely governed.</span></h1>
         <p className="mt-[19px] max-w-[532px] text-sm font-medium leading-[18px] text-muted-foreground">Sign in to your organization workspace to manage trusted sources, user access, quotas and audit activity.</p>
         <div className="mt-[79px] flex gap-x-[40px] whitespace-nowrap xl:gap-x-[53px]">
           <div className="flex items-start gap-[10px]"><FigmaIcon name="shield-check" className="mt-1" /><div><p className="text-[15px] font-medium leading-[19px] text-sky-600">Secure sessions</p><p className="mt-1 text-[10px] font-medium leading-[13px] text-muted-foreground">HttpOnly tokens with automatic refresh.</p></div></div>

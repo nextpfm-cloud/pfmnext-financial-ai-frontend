@@ -19,7 +19,7 @@ export default function AdminDashboard() {
   }, [])
 
   const metrics = useMemo(() => [
-    { label: "Indexed documents", value: documents.length, helper: "Across the regulatory corpus", icon: "stat-documents", iconClass: "" },
+    { label: "Indexed documents", value: documents.length, helper: "Across the finance corpus", icon: "stat-documents", iconClass: "" },
     { label: "Processed chunks", value: documents.reduce((total, item) => total + item.chunk_count, 0).toLocaleString(), helper: "Available for vector retrieval", icon: "stat-chunks", iconClass: "" },
     { label: "Pages scanned", value: documents.reduce((total, item) => total + item.page_count, 0).toLocaleString(), helper: "OCR and native text layers", icon: "stat-pages", iconClass: "-scale-y-100" },
     { label: "Public sources", value: documents.filter((item) => item.visibility === "public").length, helper: "Open to anonymous access", icon: "stat-sources", iconClass: "" },

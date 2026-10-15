@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 import { Loader2, Plus, SlidersHorizontal } from "lucide-react"
 import { FigmaIcon } from "@/components/figma-icon"
 
-const categoryOptions = [{ tag: "acts", label: "Acts" }, { tag: "gazettes", label: "Gazettes" }, { tag: "circulars", label: "Circulars" }, { tag: "guidelines", label: "Guidelines" }]
+const categoryOptions = [{ tag: "action_plan", label: "Action Plan" }, { tag: "performance_report", label: "Performance Report" }, { tag: "budget", label: "Budget" }, { tag: "others", label: "Others" }]
 interface Props { onSend: () => void; initialValue: string; onChange: (value: string) => void; isLoading?: boolean; selectedCategories?: string[]; onCategoriesChange?: (value: string[]) => void; selectedCountries?: string[]; onCountriesChange?: (value: string[]) => void; topK?: number; onTopKChange?: (value: number) => void }
 
 export function ChatComposer({ onSend, initialValue, onChange, isLoading = false, selectedCategories = [], onCategoriesChange, selectedCountries = [], onCountriesChange, topK = 6, onTopKChange }: Props) {
@@ -20,7 +20,7 @@ export function ChatComposer({ onSend, initialValue, onChange, isLoading = false
   return (
     <div className="shrink-0 px-3 pb-4 sm:px-6 sm:pb-6">
       <div className="focus-glow relative mx-auto max-w-[740px] rounded-[26px] border border-transparent bg-card px-[17px] pb-[14px] pt-[10px] shadow-[0_2px_10px_rgba(0,0,0,0.12)] dark:border-border">
-        <textarea ref={textareaRef} value={value} onChange={(e) => updateValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (value.trim() && !isLoading) onSend() } }} placeholder="Ask about regulatory documents, obligations or guidance..." className="block max-h-48 min-h-[42px] w-full resize-none bg-transparent pt-[12px] text-sm leading-5 text-foreground outline-none placeholder:text-xs placeholder:font-medium placeholder:text-[#c4c4c4]" maxLength={4000} />
+        <textarea ref={textareaRef} value={value} onChange={(e) => updateValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (value.trim() && !isLoading) onSend() } }} placeholder="Ask about budgets, performance reports or action plans..." className="block max-h-48 min-h-[42px] w-full resize-none bg-transparent pt-[12px] text-sm leading-5 text-foreground outline-none placeholder:text-xs placeholder:font-medium placeholder:text-[#c4c4c4]" maxLength={4000} />
         {filtersOpen && <div className="tool-panel mb-3 mt-1 grid gap-4 p-3 sm:grid-cols-[1fr_auto]">
           <div>
             <p className="mb-2 text-[11px] font-semibold text-muted-foreground">Source categories</p>

@@ -33,7 +33,7 @@ export async function createConversation(payload: ChatRequest, idempotencyKey: s
     method: "POST",
     headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(payload),
-  }), "The regulatory service could not start this conversation.")
+  }), "The finance service could not start this conversation.")
 }
 
 export async function addConversationMessage(id: string, payload: ChatRequest, idempotencyKey: string): Promise<ConversationExchange> {
@@ -41,7 +41,7 @@ export async function addConversationMessage(id: string, payload: ChatRequest, i
     method: "POST",
     headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(payload),
-  }), "The regulatory service could not answer this question.")
+  }), "The finance service could not answer this question.")
 }
 
 export async function renameConversation(id: string, title: string): Promise<ConversationSummary> {

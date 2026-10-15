@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { CalendarClock, ExternalLink, Globe2, Layers3, Loader2, Save, ScanText, Shield, Trash2 } from "lucide-react"
 import { deleteDocument, updateDocument } from "@/lib/services/document-service"
 import type { DocumentSummary, DocumentVisibility } from "@/types"
-const categories = [{ value: "acts", label: "Acts" }, { value: "gazettes", label: "Gazettes" }, { value: "circulars", label: "Circulars" }, { value: "guidelines", label: "Guidelines" }]
+const categories = [{ value: "action_plan", label: "Action Plan" }, { value: "performance_report", label: "Performance Report" }, { value: "budget", label: "Budget" }, { value: "others", label: "Others" }]
 export function DocumentDetails({ document }: { document: DocumentSummary }) {
   const router = useRouter(); const [editing, setEditing] = useState(false); const [saving, setSaving] = useState(false); const [deleting, setDeleting] = useState(false); const [error, setError] = useState<string | null>(null)
   const [category, setCategory] = useState(document.category); const [country, setCountry] = useState(document.jurisdiction_country_code); const [visibility, setVisibility] = useState<DocumentVisibility>(document.visibility); const [sourceUrl, setSourceUrl] = useState(document.source_url)

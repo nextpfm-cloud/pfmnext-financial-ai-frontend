@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { BookOpenCheck, Building2, Landmark, Loader2, ScrollText, X } from "lucide-react"
+import { BarChart3, BookOpenCheck, ClipboardList, Loader2, Wallet, X } from "lucide-react"
 import { FigmaIcon } from "@/components/figma-icon"
 import { ChatSidebar } from "@/components/chat-sidebar"
 import { ChatHeader } from "@/components/chat-header"
@@ -14,10 +14,10 @@ import { apiErrorMessage, type AppSession, type ChatResponse, type ConversationM
 
 const repository = createConversationRepository()
 const suggestions = [
-  { icon: Landmark, title: "What are the current income tax obligations?", detail: "Acts and statutory requirements" },
-  { icon: Building2, title: "Summarize recent VAT exemption changes", detail: "Gazettes and circular updates" },
-  { icon: ScrollText, title: "What filing deadlines should we track?", detail: "Compliance calendar review" },
-  { icon: BookOpenCheck, title: "Compare guidance across source categories", detail: "Cross-document regulatory analysis" },
+  { icon: Wallet, title: "How is this year's budget allocated across programmes?", detail: "Budget estimates and allocations" },
+  { icon: BarChart3, title: "Which performance targets were missed last year?", detail: "Performance reports" },
+  { icon: ClipboardList, title: "What actions are planned and who is responsible?", detail: "Action plans and timelines" },
+  { icon: BookOpenCheck, title: "Compare spending plans with reported results", detail: "Cross-document financial analysis" },
 ]
 
 function toMessage(message: PersistedConversationMessage): ConversationMessage {
@@ -127,7 +127,7 @@ export default function ChatConversationPage() {
 
       const response = await fetch("/api/backend/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
       const data = (await response.json().catch(() => ({}))) as ChatResponse & { error?: string; detail?: string }
-      if (!response.ok) throw new Error(apiErrorMessage(data, "The regulatory service could not answer this question."))
+      if (!response.ok) throw new Error(apiErrorMessage(data, "The finance service could not answer this question."))
       const assistantMessage: ConversationMessage = { id: crypto.randomUUID(), role: "assistant", content: data.answer_markdown || "No answer was returned.", timestamp: Date.now(), citations: data.citations ?? [], usedCategories: data.used_categories ?? [], status: "completed" }
       const completedMessages = [...pendingMessages.map((message) => message.id === userMessage.id ? { ...message, status: "completed" as const } : message), assistantMessage]
       setMessages(completedMessages)
@@ -178,8 +178,8 @@ export default function ChatConversationPage() {
               <section className="mx-auto flex max-w-[640px] flex-col items-center px-4 text-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/brand/x-mark-glow.png" alt="" aria-hidden="true" width={160} height={136} className="h-[136px] w-[160px]" />
-                <h1 className="-mt-2.5 text-[32px] font-bold leading-[1.26] text-sky-600 sm:text-[40px]">Regulatory clarity,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>on demand.</span></h1>
-                <p className="mt-[31px] max-w-[360px] text-sm font-medium leading-[18px] text-muted-foreground">{session?.authenticated ? "Ask a question to begin a private, persistent conversation with contextual follow-ups." : "Search acts, gazettes, circulars and policy guidance through one grounded intelligence workspace."}</p>
+                <h1 className="-mt-2.5 text-[32px] font-bold leading-[1.26] text-sky-600 sm:text-[40px]">Financial clarity,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>on demand.</span></h1>
+                <p className="mt-[31px] max-w-[360px] text-sm font-medium leading-[18px] text-muted-foreground">{session?.authenticated ? "Ask a question to begin a private, persistent conversation with contextual follow-ups." : "Search action plans, performance reports and budgets through one grounded intelligence workspace."}</p>
                 {error && <div className="mt-5 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
               </section>
               <div className="mt-[clamp(2rem,9.5vh,6.0625rem)]">{composer}</div>
