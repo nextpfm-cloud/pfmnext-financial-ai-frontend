@@ -2,92 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-/* PFMnext design tokens (Figma "Untitled", Oct 2026). Light is the designed theme; dark is derived. */
+/* Google Sans (SIL Open Font License, public/fonts/OFL.txt), self-hosted. */
+@font-face {
+  font-family: "Google Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/GoogleSans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Google Sans";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/GoogleSans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Design tokens. Light is the designed theme; dark is derived. */
 @layer base {
   :root {
     color-scheme: light;
+    --font-sans: "Google Sans";
+
+    /* ── Brand palette: the PFM NEXT logo colours. Edit these to rebrand. ──────────────────────
+       Hue / saturation / lightness are separate so tailwind.config.ts can build full scales
+       (sky = blue, emerald = green, red = red, amber = orange) from them. */
+    --brand-blue-h: 203;   --brand-blue-s: 84%;   --brand-blue-l: 42%;     /* #1180C3 */
+    --brand-green-h: 86;   --brand-green-s: 54%;  --brand-green-l: 51%;    /* #8CC53F */
+    --brand-red-h: 346;    --brand-red-s: 85%;    --brand-red-l: 52%;      /* #ED1D4E */
+    --brand-orange-h: 37;  --brand-orange-s: 95%; --brand-orange-l: 59%;   /* #FAAF34 */
+    --brand-ink: 204 19% 26%;                                              /* #36454F text */
+
+    /* Composite brand colours, for hsl(var(--brand-blue) / alpha) */
+    --brand-blue: var(--brand-blue-h) var(--brand-blue-s) var(--brand-blue-l);
+    --brand-green: var(--brand-green-h) var(--brand-green-s) var(--brand-green-l);
+    --brand-red: var(--brand-red-h) var(--brand-red-s) var(--brand-red-l);
+    --brand-orange: var(--brand-orange-h) var(--brand-orange-s) var(--brand-orange-l);
+    /* Large headline accent ("on demand."): the logo green darkened to 3:1 contrast on white */
+    --accent-display: var(--brand-green-h) var(--brand-green-s) 40%;
+
+    /* ── Semantic colours (built from the palette) ──────────────────────────────────────────── */
     --background: 0 0% 100%;
-    --foreground: 204 19% 26%;            /* charcoal #36454f */
+    --foreground: var(--brand-ink);
     --card: 0 0% 100%;
-    --card-foreground: 204 19% 26%;
+    --card-foreground: var(--brand-ink);
     --popover: 0 0% 100%;
-    --popover-foreground: 204 19% 26%;
-    --primary: 192 74% 35%;               /* teal #178099 */
+    --popover-foreground: var(--brand-ink);
+    --primary: var(--brand-blue-h) var(--brand-blue-s) 40%;   /* logo blue, deepened to 4.5:1 for white text */
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 97%;                /* #f8f8f8 */
-    --secondary-foreground: 204 19% 26%;
-    --muted: 0 0% 96%;                    /* #f5f5f5 */
-    --muted-foreground: 0 0% 55%;         /* #8d8d8d */
+    --secondary: 0 0% 97%;
+    --secondary-foreground: var(--brand-ink);
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 55%;
     --accent: 0 0% 96%;
-    --accent-foreground: 204 19% 26%;
-    --destructive: 0 72% 51%;
+    --accent-foreground: var(--brand-ink);
+    --destructive: var(--brand-red-h) var(--brand-red-s) 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 91%;                   /* #e7e7e7 */
-    --input: 0 0% 88%;                    /* #e0e0e0 */
-    --ring: 192 74% 35%;
-    --radius: 0.625rem;                   /* 10px */
-    --brand-lime: 65 100% 36%;            /* #a8b600 */
-    --sidebar-background: 0 0% 95%;       /* #f3f3f3 */
-    --sidebar-footer: 0 2% 90%;           /* #e5e4e4 */
-    --surface: 0 0% 97%;                  /* #f8f8f8 */
-    --tab-active-border: 0 0% 78%;        /* #c7c7c7 */
+    --border: 0 0% 91%;
+    --input: 0 0% 88%;
+    --ring: var(--brand-blue);
+    --radius: 0.625rem;
+    --sidebar-background: 0 0% 95%;
+    --sidebar-footer: 0 2% 90%;
+    --surface: 0 0% 97%;
+    --tab-active-border: 0 0% 78%;
   }
 
   .dark {
     color-scheme: dark;
-    --background: 200 14% 8%;
-    --foreground: 200 12% 88%;
-    --card: 200 13% 11%;
-    --card-foreground: 200 12% 92%;
-    --popover: 200 13% 12%;
-    --popover-foreground: 200 12% 92%;
-    --primary: 191 62% 42%;
+    --accent-display: var(--brand-green-h) var(--brand-green-s) 55%;
+    --background: 205 16% 8%;
+    --foreground: 205 12% 88%;
+    --card: 205 15% 11%;
+    --card-foreground: 205 12% 92%;
+    --popover: 205 15% 12%;
+    --popover-foreground: 205 12% 92%;
+    --primary: var(--brand-blue-h) 70% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 200 12% 14%;
-    --secondary-foreground: 200 12% 88%;
-    --muted: 200 12% 14%;
-    --muted-foreground: 200 8% 62%;
-    --accent: 200 12% 16%;
-    --accent-foreground: 200 12% 92%;
-    --destructive: 0 62% 45%;
+    --secondary: 205 12% 14%;
+    --secondary-foreground: 205 12% 88%;
+    --muted: 205 12% 14%;
+    --muted-foreground: 205 8% 62%;
+    --accent: 205 12% 16%;
+    --accent-foreground: 205 12% 92%;
+    --destructive: var(--brand-red-h) 70% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 200 10% 20%;
-    --input: 200 10% 24%;
-    --ring: 191 62% 48%;
-    --brand-lime: 65 90% 42%;
-    --sidebar-background: 200 14% 10%;
-    --sidebar-footer: 200 13% 13%;
-    --surface: 200 12% 13%;
-    --tab-active-border: 200 8% 34%;
+    --border: 205 10% 20%;
+    --input: 205 10% 24%;
+    --ring: var(--brand-blue-h) 70% 55%;
+    --sidebar-background: 205 16% 10%;
+    --sidebar-footer: 205 15% 13%;
+    --surface: 205 12% 13%;
+    --tab-active-border: 205 8% 34%;
   }
 
   * { @apply border-border; }
   html, body { min-height: 100%; }
   body { @apply bg-background font-sans text-foreground antialiased; }
-  ::selection { background: rgba(23, 128, 153, 0.22); }
+  ::selection { background: hsl(var(--brand-blue) / 0.22); }
 }
 
 @layer components {
   /* Main content card: white, lime outline, 17px radius */
-  .surface-card { @apply rounded-[17px] border bg-card; border-color: hsl(var(--brand-lime)); }
+  .surface-card { @apply rounded-[17px] border bg-card; border-color: hsl(var(--brand-green)); }
   /* Grey tool panel (filters, form sections): #f8f8f8, hairline border, 10px radius */
   .tool-panel { @apply rounded-[10px] border; background: hsl(var(--surface)); border-color: hsl(0 0% 94%); }
   .dark .tool-panel { border-color: hsl(var(--border)); }
   .glass-panel { @apply border border-border bg-card; }
-  .focus-glow:focus-within { border-color: rgba(23, 128, 153, 0.45); }
+  .focus-glow:focus-within { border-color: hsl(var(--brand-blue) / 0.45); }
   .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground; }
   /* Page heading block used on every admin screen */
   .page-title { @apply text-[28px] font-medium leading-tight text-foreground sm:text-4xl; }
   .page-subtitle { @apply mt-1.5 text-sm font-medium text-muted-foreground; }
   /* Pill tabs / pill controls in the top bar and filters */
-  .pill-tab { @apply inline-flex h-[35px] min-w-[141px] items-center justify-center rounded-full border px-5 text-sm font-medium text-foreground transition; border-color: hsl(0 0% 94%); }
-  .pill-tab:hover { background: hsl(var(--surface)); }
+  .pill-tab { @apply inline-flex h-[35px] min-w-[141px] items-center justify-center rounded-full border px-5 text-sm font-medium text-foreground transition duration-200 active:scale-[0.97]; border-color: hsl(0 0% 94%); }
+  .pill-tab:hover { background: hsl(var(--surface)); border-color: hsl(var(--brand-blue) / 0.35); }
   .pill-tab[aria-current="page"] { background: hsl(var(--surface)); border-color: hsl(var(--tab-active-border)); }
   .dark .pill-tab { border-color: hsl(var(--border)); }
-  .chip { @apply inline-flex h-[25px] min-w-[76px] items-center justify-center rounded-full border border-input bg-card px-3 text-xs font-medium text-foreground transition; }
+  .chip { @apply inline-flex h-[25px] min-w-[76px] items-center justify-center rounded-full border border-input bg-card px-3 text-xs font-medium text-foreground transition duration-200 hover:border-sky-400/60 active:scale-95; }
   .chip[aria-pressed="true"] { @apply border-sky-400 bg-sky-400 text-white; }
   /* Primary pill button (Sign in securely, form actions) */
-  .btn-primary { @apply inline-flex h-[43px] items-center justify-center gap-2 rounded-full bg-sky-400 px-6 text-sm font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply inline-flex h-[43px] items-center justify-center gap-2 rounded-full bg-sky-400 px-6 text-sm font-medium text-white transition duration-200 hover:-translate-y-px hover:bg-sky-700 hover:shadow-[0_8px_20px_-10px_hsl(var(--brand-blue)/0.8)] active:translate-y-0 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50; }
   /* Small square utility button on the right edge (27px, #efefef outline) */
   .util-button { @apply grid h-[27px] w-[27px] place-items-center rounded-md border bg-background text-muted-foreground transition hover:text-foreground; border-color: hsl(0 0% 94%); }
   .dark .util-button { border-color: hsl(var(--border)); }
@@ -98,7 +135,7 @@
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { border-radius: 999px; background: rgba(141, 141, 141, 0.32); }
-::-webkit-scrollbar-thumb:hover { background: rgba(23, 128, 153, 0.4); }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--brand-blue) / 0.4); }
 :focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 
 @keyframes beacon-pulse {
@@ -106,3 +143,35 @@
   50% { transform: scale(1.05); opacity: 1; }
 }
 .beacon-pulse { animation: beacon-pulse 3.5s ease-in-out infinite; }
+
+/* ── Motion ─────────────────────────────────────────────────────────────────────────────────
+   Durations and easing in one place. Everything below is switched off for reduced motion. */
+:root { --motion-fast: 160ms; --motion-base: 280ms; --motion-ease: cubic-bezier(0.22, 1, 0.36, 1); }
+
+@keyframes page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes message-in { from { opacity: 0; transform: translateY(6px) scale(0.99); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.97); } to { opacity: 1; transform: none; } }
+
+/* Page content on navigation (admin pages via app/admin/template.tsx, chat views) */
+.animate-page-in { animation: page-in var(--motion-base) var(--motion-ease) both; }
+/* Chat messages as they arrive */
+.animate-message-in { animation: message-in var(--motion-base) var(--motion-ease) both; }
+/* Menus and popovers */
+.animate-pop-in { animation: pop-in var(--motion-fast) var(--motion-ease) both; transform-origin: top right; }
+/* Children appear one after another */
+.stagger-in > * { animation: page-in var(--motion-base) var(--motion-ease) both; }
+.stagger-in > *:nth-child(2) { animation-delay: 50ms; }
+.stagger-in > *:nth-child(3) { animation-delay: 100ms; }
+.stagger-in > *:nth-child(4) { animation-delay: 150ms; }
+.stagger-in > *:nth-child(n+5) { animation-delay: 200ms; }
+/* Cards that lift slightly on hover */
+.hover-lift { transition: transform var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease), border-color var(--motion-fast); }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -22px hsl(var(--brand-blue) / 0.7); }
+
+/* Full-page navigations within this app cross-fade (browsers with cross-document view transitions) */
+@view-transition { navigation: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; scroll-behavior: auto !important; }
+  @view-transition { navigation: none; }
+}

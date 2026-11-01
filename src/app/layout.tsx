@@ -1,9 +1,6 @@
 import type { Metadata } from "next"
-import { Plus_Jakarta_Sans } from "next/font/google"
 import { Providers } from "./providers"
 import "./globals.css"
-
-const fontSans = Plus_Jakarta_Sans({ subsets: ["latin"], weight: ["300", "400", "500", "600", "700"], variable: "--font-sans", display: "swap" })
 
 export const metadata: Metadata = {
   title: "Fiscal Mind — Financial Document Assistant",
@@ -17,7 +14,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className={fontSans.variable}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Google Sans, self-hosted (see globals.css) */}
+        <link rel="preload" href="/fonts/GoogleSans-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+      </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
       </body>

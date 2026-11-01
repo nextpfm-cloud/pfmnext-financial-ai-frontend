@@ -7,7 +7,9 @@ export const SESSION_TTL_SECONDS = 60 * 60 * 10
 export const OIDC_TRANSACTION_TTL_SECONDS = 60 * 10
 
 export type AppRole = "admin" | "auditor" | "user"
-export type SessionPayload = { username: string; organization?: string; role: AppRole; expiresAt: number }
+import type { ProductKey } from "@/lib/products"
+
+export type SessionPayload = { username: string; organization?: string; role: AppRole; products?: ProductKey[]; expiresAt: number }
 export type OidcTransaction = { state: string; nonce: string; verifier: string; next?: string; action?: "UPDATE_PASSWORD"; expiresAt: number }
 
 function toBase64Url(bytes: Uint8Array): string {

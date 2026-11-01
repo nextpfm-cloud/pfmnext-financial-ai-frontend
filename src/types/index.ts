@@ -1,3 +1,5 @@
+import type { ProductKey } from "@/lib/products"
+
 export type DocumentCategory = { tag: string; label: string; document_count?: number }
 export type DocumentVisibility = "public" | "internal"
 export type DocumentSummary = {
@@ -48,7 +50,7 @@ export type UserRole = "user" | "admin" | "auditor"
 export type UserAccessLevel = "free" | "granted"
 export type ManagedUser = { user_id: string; username: string | null; email: string | null; role: UserRole; access_level: UserAccessLevel; daily_chat_limit: number | null; effective_daily_limit: number | null; status: "active" | "disabled"; last_seen_at: string | null; created_at: string; updated_at: string }
 export type AuditEvent = { audit_event_id: string; occurred_at: string; request_id: string; actor_user_id: string | null; device_id: string | null; action: string; resource_type: string | null; resource_id: string | null; outcome: string; http_status: number | null; metadata: Record<string, unknown> }
-export type AppSession = { authenticated: boolean; username?: string; organization?: string; role?: UserRole; expiresAt?: number }
+export type AppSession = { authenticated: boolean; username?: string; organization?: string; role?: UserRole; products?: ProductKey[]; expiresAt?: number }
 export type HealthResponse = { status: "ok" | "degraded" | "unhealthy"; database: "connected" | "disconnected" | "unavailable" }
 export type ApiError = { status: number; code: string; message: string; retryable: boolean }
 export type ApiResponse<T> = { success: true; data: T } | { success: false; error: ApiError }

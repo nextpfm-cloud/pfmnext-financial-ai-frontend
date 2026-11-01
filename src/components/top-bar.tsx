@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { LogIn, LogOut, Menu, User } from "lucide-react"
 import { AppBrand } from "@/components/app-brand"
 import { FigmaIcon } from "@/components/figma-icon"
+import { ProductSwitcher } from "@/components/product-switcher"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import type { AppSession, ChatUsage } from "@/types"
 
@@ -47,6 +48,7 @@ export function TopBar({ tabs, mobileMenuEvent, showUsage = false }: { tabs: (se
       <div className="flex items-center gap-2 pt-1.5 lg:pt-0">
         {showUsage && usage && <span className="mr-2 hidden rounded-full border border-border px-3 py-1 text-[10px] font-medium text-muted-foreground sm:inline">{usage.remaining === null ? "Unlimited" : `${usage.remaining} / ${usage.limit} queries left`}</span>}
         {session ? <>
+          <div className="mr-1"><ProductSwitcher products={session.products} /></div>
           <div className="hidden text-right sm:block">
             <p className="text-[10px] font-semibold leading-[13px] text-[#4a4a4a] dark:text-foreground">{session.username}</p>
             <p className="text-[8px] capitalize leading-[10px] text-muted-foreground/70">{session.organization ? `${session.organization} · ` : ""}{session.role}</p>

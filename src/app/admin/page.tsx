@@ -35,8 +35,8 @@ export default function AdminDashboard() {
     </div>
     {error && <div className="mt-6 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
 
-    <div className="mt-10 grid gap-x-[24.5px] gap-y-4 sm:grid-cols-2 lg:mt-[62px] xl:grid-cols-4">
-      {metrics.map(({ label, value, helper, icon, iconClass }, index) => <div key={label} className="relative h-[135px] rounded-[10px] border bg-[hsl(var(--surface))] pl-[23px] pr-[14px] pt-[20px]" style={{ borderColor: index % 2 === 0 ? "#178099" : "hsl(var(--brand-lime))" }}>
+    <div className="stagger-in mt-10 grid gap-x-[24.5px] gap-y-4 sm:grid-cols-2 lg:mt-[62px] xl:grid-cols-4">
+      {metrics.map(({ label, value, helper, icon, iconClass }, index) => <div key={label} className="hover-lift relative h-[135px] rounded-[10px] border bg-[hsl(var(--surface))] pl-[23px] pr-[14px] pt-[20px]" style={{ borderColor: index % 2 === 0 ? "hsl(var(--brand-blue))" : "hsl(var(--brand-green))" }}>
         <div className="flex items-start justify-between"><p className="text-[15px] font-semibold leading-[19px] text-foreground">{label}</p><FigmaIcon name={icon} dark className={iconClass} /></div>
         <p className="mt-[5px] text-[41px] font-medium leading-[52px] text-foreground">{value}</p>
         <p className="ml-1 mr-[9px] whitespace-nowrap border-t border-foreground/50 pt-[5px] text-xs font-medium leading-[15px] text-foreground">{helper}</p>

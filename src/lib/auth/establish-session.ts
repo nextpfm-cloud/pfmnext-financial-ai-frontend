@@ -1,10 +1,11 @@
 import { cookies } from "next/headers"
 import { ACCESS_TOKEN_COOKIE, DEVICE_ID_COOKIE, REFRESH_TOKEN_COOKIE, SESSION_COOKIE, SESSION_TTL_SECONDS, createSessionToken, secureCookie, type AppRole } from "@/lib/auth/session"
-import { decodeAccessClaims, resolveApplicationRole, type TokenResponse } from "@/lib/auth/oidc"
+import { decodeAccessClaims, oidcClientId, resolveApplicationRole, type TokenResponse } from "@/lib/auth/oidc"
+import { productsFromRoles, type ProductKey } from "@/lib/products"
 
 export class SessionConfigurationError extends Error {}
 
-export type EstablishedSession = { username: string; organization?: string; role: AppRole }
+export type EstablishedSession = { username: string; organization?: string; role: AppRole; products: ProductKey[] }
 
 export async function establishSession(tokens: TokenResponse, fallbackUsername?: string): Promise<EstablishedSession> {
   const secret = process.env.NEXTPFM_SESSION_SECRET
@@ -13,13 +14,15 @@ export async function establishSession(tokens: TokenResponse, fallbackUsername?:
   const role = await resolveApplicationRole(tokens.access_token, deviceId)
   const claims = decodeAccessClaims(tokens.access_token)
   const username = claims.preferred_username ?? fallbackUsername ?? ""
-  const session = await createSessionToken({ username, organization: claims.organization_name, role }, secret)
+  // Products this identity may open, for the product switcher (the portal re-checks on opening).
+  const products = productsFromRoles(claims.resource_access?.[oidcClientId()]?.roles ?? [])
+  const session = await createSessionToken({ username, organization: claims.organization_name, role, products }, secret)
   const options = { httpOnly: true, secure: secureCookie(), sameSite: "lax" as const, path: "/" }
   cookies().set(ACCESS_TOKEN_COOKIE, tokens.access_token, { ...options, maxAge: tokens.expires_in })
   cookies().set(REFRESH_TOKEN_COOKIE, tokens.refresh_token, { ...options, maxAge: tokens.refresh_expires_in ?? SESSION_TTL_SECONDS })
   cookies().set(SESSION_COOKIE, session, { ...options, maxAge: SESSION_TTL_SECONDS })
   if (!cookies().get(DEVICE_ID_COOKIE)) cookies().set(DEVICE_ID_COOKIE, deviceId, { ...options, maxAge: 60 * 60 * 24 * 365 })
-  return { username, organization: claims.organization_name, role }
+  return { username, organization: claims.organization_name, role, products }
 }
 
 export function safeRelativePath(value: string | null | undefined): string | null {

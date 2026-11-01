@@ -24,7 +24,7 @@ export class PasswordAuthenticationError extends Error {
   constructor(public readonly status: number, message: string) { super(message) }
 }
 
-export function decodeAccessClaims(token: string): { preferred_username?: string; organization_name?: string } {
+export function decodeAccessClaims(token: string): { preferred_username?: string; organization_name?: string; resource_access?: Record<string, { roles?: string[] }> } {
   try { return JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8")) } catch { return {} }
 }
 export function decodeIdTokenClaims(token: string): { nonce?: string; iss?: string; aud?: string | string[] } {

@@ -1,5 +1,18 @@
 import type { Config } from "tailwindcss";
 
+// Brand colour scales from the PFM NEXT logo. Each scale reads its hue and saturation from CSS
+// variables (--brand-<name>-h / -s in globals.css), so a rebrand only edits those variables.
+// Step 500 is the exact logo colour; the other steps fix the lightness.
+const LIGHTNESS = { 50: "97%", 100: "93%", 200: "85%", 300: "68%", 400: "40%", 600: "38%", 700: "32%", 800: "26%", 900: "20%" } as const
+function brandScale(name: string) {
+  const color = (lightness: string) => `hsl(var(--brand-${name}-h) var(--brand-${name}-s) ${lightness} / <alpha-value>)`
+  return {
+    ...Object.fromEntries(Object.entries(LIGHTNESS).map(([step, lightness]) => [step, color(lightness)])),
+    500: color(`var(--brand-${name}-l)`),
+    DEFAULT: color(`var(--brand-${name}-l)`),
+  }
+}
+
 export default {
   darkMode: ["class"],
   content: ["./src/**/*.{ts,tsx}"],
@@ -16,9 +29,14 @@ export default {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
       },
       colors: {
-        // PFMnext brand (Figma). "sky" is remapped to the brand teal so existing accent classes follow the brand.
-        brand: { teal: "#178099", "teal-text": "#1c839b", lime: "#a8b600", charcoal: "#36454f" },
-        sky: { 50: "#f0f8fa", 100: "#dff1f5", 200: "#b8dfe8", 300: "#3d9fb6", 400: "#178099", 500: "#178099", 600: "#1c839b", 700: "#14697e", 800: "#115666", 900: "#0d434f" },
+        // Logo colours by name, and the Tailwind palettes the UI already uses remapped onto them:
+        // sky (accents, buttons, links) → blue, emerald (success) → green, red (errors) → red,
+        // amber (warnings) → orange.
+        brand: { blue: brandScale("blue"), green: brandScale("green"), red: brandScale("red"), orange: brandScale("orange"), ink: "hsl(var(--brand-ink) / <alpha-value>)" },
+        sky: brandScale("blue"),
+        emerald: brandScale("green"),
+        red: brandScale("red"),
+        amber: brandScale("orange"),
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

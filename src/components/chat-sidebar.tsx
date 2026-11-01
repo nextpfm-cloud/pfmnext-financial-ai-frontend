@@ -148,22 +148,22 @@ export function ChatSidebar() {
           <button type="button" onClick={() => void createChat()} className={`flex h-[35px] items-center justify-center gap-[13px] rounded-[13px] bg-sky-400 text-sm font-medium text-white transition hover:bg-sky-700 ${collapsed ? "w-[35px]" : "w-full"}`} aria-label="New chat"><FigmaIcon name="new-chat" />{!collapsed && "New chat"}</button>
           {!collapsed && <label className="relative mt-[clamp(1rem,8.4vh,5.375rem)] block">
             <FigmaIcon name="search" className="absolute left-[7px] top-1/2 -translate-y-1/2" />
-            <input ref={searchRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search chat" aria-label="Search conversations" className="h-[35px] w-full rounded-[13px] border bg-muted pl-[34px] pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-[hsl(var(--brand-lime))]" style={{ borderColor: "hsl(var(--brand-lime))" }} />
+            <input ref={searchRef} value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search chat" aria-label="Search conversations" className="h-[35px] w-full rounded-[13px] border bg-muted pl-[34px] pr-10 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:ring-1 focus:ring-[hsl(var(--brand-green))]" style={{ borderColor: "hsl(var(--brand-green))" }} />
             {!searchQuery && <FigmaIcon name="cmd-k" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 opacity-60" dark />}
           </label>}
         </div>
 
         <div className={`min-h-0 flex-1 overflow-y-auto pb-4 pt-[34px] ${collapsed ? "px-[21px]" : "pl-[32px] pr-4"}`}>
-          {loading ? <div className="grid h-24 place-items-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div> : collapsed ? <div className="flex flex-col items-center gap-3">{conversations.slice(0, 9).map((conversation) => <button type="button" key={conversation.id} title={conversation.title} onClick={() => router.push(`/chat/${conversation.id}`)} className="grid h-6 w-6 place-items-center rounded-full hover:bg-foreground/[0.06]" aria-label={conversation.title}><span className={`block rounded-full ${isActive(conversation.id) ? "h-[9px] w-[9px] bg-sky-400" : "h-[7px] w-[7px]"}`} style={isActive(conversation.id) ? undefined : { background: "hsl(var(--brand-lime))" }} /></button>)}</div> : <>
+          {loading ? <div className="grid h-24 place-items-center"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div> : collapsed ? <div className="flex flex-col items-center gap-3">{conversations.slice(0, 9).map((conversation) => <button type="button" key={conversation.id} title={conversation.title} onClick={() => router.push(`/chat/${conversation.id}`)} className="grid h-6 w-6 place-items-center rounded-full hover:bg-foreground/[0.06]" aria-label={conversation.title}><span className={`block rounded-full ${isActive(conversation.id) ? "h-[9px] w-[9px] bg-sky-400" : "h-[7px] w-[7px]"}`} style={isActive(conversation.id) ? undefined : { background: "hsl(var(--brand-green))" }} /></button>)}</div> : <>
             {Object.entries(grouped).map(([label, items]) => {
               if (items.length === 0) return null
               const open = !closedGroups.includes(label)
               return <section key={label} className="mb-[26px]">
                 <button type="button" onClick={() => toggleGroup(label)} aria-expanded={open} className="flex items-center gap-2 text-[10px] font-semibold text-[#939292]">{label}<FigmaIcon name="chevron-down" className={open ? "-scale-y-100" : "rotate-90"} /></button>
                 {open && <div className="relative ml-3 mt-[7px] border-l border-sky-400/70 pb-px pt-[28px]">
-                  <span className="absolute -left-[4px] -top-px h-[7px] w-[7px] rounded-full" style={{ background: "hsl(var(--brand-lime))" }} />
+                  <span className="absolute -left-[4px] -top-px h-[7px] w-[7px] rounded-full" style={{ background: "hsl(var(--brand-green))" }} />
                   {items.map((conversation) => <div key={conversation.id} className="group relative flex h-[31px] items-center">
-                    <span className="absolute -left-[4px] top-1/2 h-[7px] w-[7px] -translate-y-1/2 rounded-full" style={{ background: "hsl(var(--brand-lime))" }} />
+                    <span className="absolute -left-[4px] top-1/2 h-[7px] w-[7px] -translate-y-1/2 rounded-full" style={{ background: "hsl(var(--brand-green))" }} />
                     {renamingId === conversation.id
                       ? <input autoFocus maxLength={120} value={renameValue} onChange={(event) => setRenameValue(event.target.value)} onBlur={() => void renameChat(conversation.id)} onKeyDown={(event) => { if (event.key === "Enter") void renameChat(conversation.id); if (event.key === "Escape") setRenamingId(null) }} className="ml-4 h-7 w-full rounded-md border border-input bg-background px-2 text-sm outline-none" />
                       : <button type="button" onClick={() => { setMobileOpen(false); router.push(`/chat/${conversation.id}`) }} className={`min-w-0 flex-1 truncate pl-4 pr-12 text-left text-sm transition hover:text-foreground ${isActive(conversation.id) ? "font-medium text-foreground" : "text-muted-foreground"}`}>{conversation.title}</button>}

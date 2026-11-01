@@ -175,10 +175,10 @@ export default function ChatConversationPage() {
         {isEmpty ? (
           <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
             <div className="my-auto pb-[clamp(0px,5.5vh,3.5rem)]">
-              <section className="mx-auto flex max-w-[640px] flex-col items-center px-4 text-center">
+              <section className="animate-page-in mx-auto flex max-w-[640px] flex-col items-center px-4 text-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/brand/pfmnext-mark.svg" alt="" aria-hidden="true" width={173} height={182} className="h-[182px] w-[173px]" />
-                <h1 className="text-[32px] font-bold leading-[1.26] text-sky-600 sm:text-[40px]">Financial clarity,<br /><span style={{ color: "hsl(var(--brand-lime))" }}>on demand.</span></h1>
+                <h1 className="text-[32px] font-bold leading-[1.26] text-sky-600 sm:text-[40px]">Financial clarity,<br /><span style={{ color: "hsl(var(--accent-display))" }}>on demand.</span></h1>
                 <p className="mt-[31px] max-w-[360px] text-sm font-medium leading-[18px] text-muted-foreground">{session?.authenticated ? "Ask a question to begin a private, persistent conversation with contextual follow-ups." : "Search action plans, performance reports and budgets through one grounded intelligence workspace."}</p>
                 {error && <div className="mt-5 rounded-[10px] border border-red-400/20 bg-red-400/[0.06] px-4 py-3 text-sm text-red-700 dark:text-red-200">{error}</div>}
               </section>
