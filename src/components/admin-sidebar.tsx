@@ -31,7 +31,7 @@ export function AdminSidebar() {
   return <>
     {mobileOpen && <button type="button" className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setMobileOpen(false)} aria-label="Close navigation" />}
     <aside className={`fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col bg-sidebar transition-all duration-300 lg:static lg:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "w-[76px]" : "w-[280px]"}`}>
-      <div className={`flex h-[79px] shrink-0 items-start pt-4 ${collapsed ? "flex-col items-center gap-3 px-2" : "justify-between pl-[22px] pr-[19px]"}`}>
+      <div className={`flex h-[79px] shrink-0 items-start pt-[15px] ${collapsed ? "flex-col items-center gap-3 px-2" : "justify-between pl-[18px] pr-[19px]"}`}>
         <AppBrand compact={collapsed} />
         <button type="button" onClick={() => setCollapsed((value) => !value)} className="hidden h-7 w-7 place-items-center rounded-md transition hover:bg-foreground/[0.06] lg:grid" aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}><FigmaIcon name="sidebar-toggle" dark /></button>
         <button type="button" onClick={() => setMobileOpen(false)} className="grid h-8 w-8 place-items-center text-muted-foreground lg:hidden" aria-label="Close navigation"><X className="h-4 w-4" /></button>
