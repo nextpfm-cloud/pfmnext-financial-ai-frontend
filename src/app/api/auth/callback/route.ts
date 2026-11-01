@@ -46,6 +46,8 @@ export async function GET(request: Request) {
     if (caught instanceof PasswordAuthenticationError) return fail(request, caught.status === 503 ? "unavailable" : "failed")
     // Authenticated with Keycloak but not authorized by this application's backend. Keep the identity
     // session: it is shared with the sibling application, which the user may still be allowed to use.
-    return fail(request, "unauthorized")
+    // The portal shows the applications this user can open.
+    const portal = process.env.NEXTPFM_PORTAL_URL?.trim().replace(/\/$/, "")
+    return portal ? redirectTo(request, `${portal}/?denied=1`) : fail(request, "unauthorized")
   }
 }

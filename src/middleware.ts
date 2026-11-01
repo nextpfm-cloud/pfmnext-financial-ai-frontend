@@ -10,7 +10,12 @@ export async function middleware(request: NextRequest) {
   if (pathname === "/admin/login") {
     if (session?.role === "admin") return NextResponse.redirect(new URL("/admin", request.url))
     if (session?.role === "auditor") return NextResponse.redirect(new URL("/admin/audit", request.url))
-    return NextResponse.next()
+    // Signing in happens on the shared Keycloak page; this page only shows sign-in errors and notices.
+    const params = request.nextUrl.searchParams
+    if (params.has("error") || params.has("passwordChanged")) return NextResponse.next()
+    const signIn = new URL("/api/auth/login", request.url)
+    const next = params.get("next"); if (next) signIn.searchParams.set("next", next)
+    return NextResponse.redirect(signIn)
   }
   if (!session || !["admin", "auditor"].includes(session.role)) {
     const loginUrl = new URL("/admin/login", request.url); loginUrl.searchParams.set("next", `${pathname}${search}`); return NextResponse.redirect(loginUrl)
