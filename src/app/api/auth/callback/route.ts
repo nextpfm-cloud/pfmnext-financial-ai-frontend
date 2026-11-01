@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
 import { OIDC_TRANSACTION_COOKIE, constantTimeEqual, readOidcTransaction, secureCookie } from "@/lib/auth/session"
-import { PasswordAuthenticationError, appOrigin, decodeIdTokenClaims, exchangeAuthorizationCode, oidcClientId, oidcIssuer, oidcRedirectUri, revokeSession, type TokenResponse } from "@/lib/auth/oidc"
+import { PasswordAuthenticationError, appOrigin, decodeIdTokenClaims, exchangeAuthorizationCode, oidcClientId, oidcIssuer, oidcRedirectUri, revokeSession } from "@/lib/auth/oidc"
 import { SessionConfigurationError, establishSession, postLoginDestination } from "@/lib/auth/establish-session"
 
 export const dynamic = "force-dynamic"
@@ -32,9 +32,8 @@ export async function GET(request: Request) {
     if (transaction.action) return redirectTo(request, `/account?passwordChanged=${actionStatus === "success" ? "1" : "0"}`)
     return fail(request, params.get("error") === "access_denied" ? "denied" : "failed")
   }
-  let tokens: TokenResponse | undefined
   try {
-    tokens = await exchangeAuthorizationCode(code, transaction.verifier, oidcRedirectUri(request))
+    const tokens = await exchangeAuthorizationCode(code, transaction.verifier, oidcRedirectUri(request))
     if (!validIdToken(tokens.id_token, transaction.nonce)) {
       await revokeSession(tokens.refresh_token)
       return fail(request, "failed")
@@ -45,8 +44,8 @@ export async function GET(request: Request) {
   } catch (caught) {
     if (caught instanceof SessionConfigurationError) return fail(request, "configuration")
     if (caught instanceof PasswordAuthenticationError) return fail(request, caught.status === 503 ? "unavailable" : "failed")
-    // Authenticated with Keycloak but not authorized by the backend: end the identity session.
-    if (tokens) await revokeSession(tokens.refresh_token)
+    // Authenticated with Keycloak but not authorized by this application's backend. Keep the identity
+    // session: it is shared with the sibling application, which the user may still be allowed to use.
     return fail(request, "unauthorized")
   }
 }

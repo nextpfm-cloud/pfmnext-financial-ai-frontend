@@ -11,7 +11,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher"
 const SIGN_IN_ERRORS: Record<string, string> = {
   expired: "Your sign-in attempt expired. Please try again.",
   denied: "Sign in was cancelled.",
-  unauthorized: "Your account does not have access to PFMNext Finance AI. Ask a Finance AI administrator to grant it.",
+  unauthorized: "Your account does not have access to Fiscal Mind. Ask a Fiscal Mind administrator to grant it.",
   unavailable: "Authentication service is unavailable. Please try again shortly.",
   configuration: "Session security is not configured.",
   failed: "Sign in failed. Please try again.",
